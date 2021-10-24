@@ -1,3 +1,8 @@
+# create a migration
+# alembic revision --autogenerate -m "first migration"
+# run migration
+# alembic upgrade head
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config

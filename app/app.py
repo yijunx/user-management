@@ -7,9 +7,9 @@ from app.config.app_config import conf
 from datetime import datetime
 
 # bps
-from app.blueprints.item import bp as itemBp
+from app.blueprints.core import bp as coreBp
 from app.blueprints.internal import bp as internalBp
-from app.blueprints.rbac import bp as rbacBp
+from app.blueprints.user import bp as userBp
 
 
 logger = get_logger(__name__)
@@ -39,6 +39,6 @@ CORS(app, resources={r"/api/*": {"origins": conf.CORS_ALLOWED_ORIGINS}})
 
 app.json_encoder = CustomJSONEncoder
 
-app.register_blueprint(itemBp)
+app.register_blueprint(userBp)
 app.register_blueprint(internalBp)
-app.register_blueprint(rbacBp)
+app.register_blueprint(coreBp)
