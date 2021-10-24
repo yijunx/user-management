@@ -2,6 +2,7 @@
 from flask import Blueprint, request
 from flask_pydantic import validate
 import requests
+
 # from app.exceptions.casbin_rule import PolicyDoesNotExist, PolicyIsAlreadyThere
 from app.exceptions.rbac import NotAuthorized
 from app.schemas.user import UserCreate, User
@@ -13,6 +14,7 @@ from app.util.process_request import get_user_info_from_request
 from app.exceptions.user import UserDoesNotExist
 from flask_wtf import csrf
 from app.util.process_request import encode_token
+
 # from app.exceptions.item import ItemDoesNotExist, ItemNameIsAlreadyThere
 
 
@@ -28,11 +30,13 @@ def login_with_google():
     # if the user is not there, create the user...
     auth_header: str = request.headers.get("Authorization", None)
     if auth_header is None:
-        return create_response(success=False, status_code=401, message="no id token from google")
+        return create_response(
+            success=False, status_code=401, message="no id token from google"
+        )
     id_token = auth_header.split(" ")[1]
     r = requests.get(
         url="https://www.googleapis.com/oauth2/v3/tokeninfo",
-        params={"id_token": id_token}
+        params={"id_token": id_token},
     )
     # create the user from the response
     print(r.json())
@@ -41,7 +45,9 @@ def login_with_google():
     item_create = UserCreate(**r.json())
 
     # now add the user into user db if the user does not exist
-    user = userService.create_item(item_create=item_create)  # if the user is there it is ok
+    user = userService.create_item(
+        item_create=item_create
+    )  # if the user is there it is ok
 
     # now user is logged in, need to response with the set-token header
     user_with_token = encode_token(user=user)
@@ -98,5 +104,3 @@ def get_anti_csrf_token():
 @bp.route("/internal/get_public_key", methods=["GET"])
 def get_public_key():
     return ""
-
-

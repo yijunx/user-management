@@ -34,9 +34,7 @@ def create_item(item_create: UserCreate) -> User:
 
 def list_items(query_pagination: QueryPagination) -> UserWithPaging:
     with get_db() as db:
-        db_items, paging = userRepo.get_all(
-            db=db, query_pagination=query_pagination
-        )
+        db_items, paging = userRepo.get_all(db=db, query_pagination=query_pagination)
         items = [User.from_orm(x) for x in db_items]
     return UserWithPaging(data=items, paging=paging)
 

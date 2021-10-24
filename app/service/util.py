@@ -35,9 +35,7 @@ def authorize(action: SpecificResourceActionsEnum = None):
                 print("casbin allows it..!")
                 return func(*args, **kwargs)
             else:
-                raise NotAuthorized(
-                    resource_id=item_id, action=action, user_id=user.id
-                )
+                raise NotAuthorized(resource_id=item_id, action=action, user_id=user.id)
 
         return wrapper_enforcer
 

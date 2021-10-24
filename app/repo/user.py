@@ -17,7 +17,7 @@ def create(db: Session, item_create: UserCreate) -> models.User:
     db_item = models.User(
         id=str(uuid4()),  # [let db create the id for us]
         name=item_create.name,
-        email=item_create.email
+        email=item_create.email,
     )
     db.add(db_item)
     try:
@@ -81,8 +81,6 @@ def get_all(
         query_pagination=query_pagination, total=total
     )
 
-    db_items = (
-        query.order_by(models.User.name.desc()).limit(limit).offset(offset).all()
-    )
+    db_items = query.order_by(models.User.name.desc()).limit(limit).offset(offset).all()
     paging.page_size = len(db_items)
     return db_items, paging
