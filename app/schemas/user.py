@@ -11,8 +11,11 @@ class User(BaseModel):
     email: Optional[str]
 
 
+class UserWithToken(User):
+    # this is exchanged user token object
+    access_token: str
+
+
 class UserWithPaging(BaseModel):
     data: List[User]
     paging: ResponsePagination
-
-

@@ -24,4 +24,3 @@ class CasbinRule(Base):
     v3 = Column(String, nullable=True)
     v4 = Column(String, nullable=True)
     v5 = Column(String, nullable=True)
-

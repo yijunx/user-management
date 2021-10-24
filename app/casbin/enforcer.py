@@ -21,14 +21,19 @@ def create_casbin_enforcer():
     # now added a function here to
     print("creating casbin enforcer")
 
-    def actions_mapping(action_from_request: str, resource_right_from_policy: str) -> bool:
+    def actions_mapping(
+        action_from_request: str, resource_right_from_policy: str
+    ) -> bool:
         """
         actions are get download patch share...
         resource_right are own / edit / view
         """
         # or if the resource_right is admin_action, then return True?
         if resource_right_from_policy in resource_right_action_mapping:
-            if action_from_request in resource_right_action_mapping[resource_right_from_policy]:
+            if (
+                action_from_request
+                in resource_right_action_mapping[resource_right_from_policy]
+            ):
                 return True
         return False
 

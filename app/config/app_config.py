@@ -7,13 +7,16 @@ class Settings(BaseSettings):
     ENV: str
     SERVICE_NAME: str
     SERVICE_VERSION: str
-    DATABASE_URI: str
+    DOMAIN_NAME: str
 
-    DEFAULT_PAGE_SIZE: int
+    DATABASE_URI: str
+    CERTS_DIR: str
+
+    DEFAULT_PAGE_SIZE: int = 5
     CORS_ALLOWED_ORIGINS: str
     USER_ADMIN_ROLE_ID: str
-    RESOURCE_NAME: str = "users/"
 
+    RESOURCE_NAME: str = "users/"
     OTHER_SERVICES_URL: str = "not set up yet"
 
 
