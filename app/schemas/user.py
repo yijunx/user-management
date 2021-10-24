@@ -5,14 +5,16 @@ from typing import List, Optional
 from app.schemas.pagination import ResponsePagination
 
 
-class User(BaseModel):
-    id: str
+class UserCreate(BaseModel):
     name: str
     email: Optional[str]
 
 
+class User(UserCreate):
+    id: str
+
+
 class UserWithToken(User):
-    # this is exchanged user token object
     access_token: str
 
 

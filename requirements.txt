@@ -3,17 +3,19 @@ gunicorn
 gevent
 alembic
 pydantic
-Flask-Cors
 psycopg2
 psycogreen
 requests
 json-logging
 python-dotenv
+Flask-Cors
 Flask-pydantic
+Flask-WTF
 sqlalchemy
 pyjwt[crypto]
 flask-request-id-header
 casbin
 casbin_sqlalchemy_adapter
+
 
 

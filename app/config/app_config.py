@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     SERVICE_NAME: str
     SERVICE_VERSION: str
     DOMAIN_NAME: str
+    APP_SECRET: str
 
     DATABASE_URI: str
     CERTS_DIR: str
