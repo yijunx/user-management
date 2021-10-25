@@ -28,7 +28,6 @@ def create_casbin_enforcer():
         actions are get download patch share...
         resource_right are own / edit / view
         """
-        # or if the resource_right is admin_action, then return True?
         if resource_right_from_policy in resource_right_action_mapping:
             if (
                 action_from_request
@@ -53,6 +52,10 @@ def create_casbin_enforcer():
     # well we cannot add policy this way because there are additional columns
     # casbin_enforcer.add_policy("admin-user-id", RESOURCE, ResourceActionsEnum.create.name)
     # casbin_enforcer.add_grouping_policy("admin-user-id", "admin-role-id")
+
+    # add a default admin user!!!
+
+    # think about the casbin rules
 
     return casbin_enforcer
 
