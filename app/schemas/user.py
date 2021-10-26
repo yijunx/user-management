@@ -36,6 +36,7 @@ class User(UserCreate):
     last_login: Optional[datetime]
     last_logout: Optional[datetime]
     email_verified: bool
+
     class Config:
         orm_mode = True
 

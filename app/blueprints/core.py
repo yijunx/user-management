@@ -117,10 +117,10 @@ def login_with_google():
                 status_code=400,
                 message="please login with email password",
             )
-        
+
     # now user is good...
     userService.update_user_login_time(item_id=user.id)
-    user_in_reponse=UserInResponse(**user.dict())
+    user_in_reponse = UserInResponse(**user.dict())
     access_token = encode_token(user_in_reponse=user_in_reponse)
     return create_response(
         response=user_in_reponse,
@@ -145,7 +145,9 @@ def authenticate():
         if user_in_token.iat > user.last_logout:
             return create_response(status=200, message="welcome")
         else:
-            return create_response(status=403, message="You have been logged out, pls login again")
+            return create_response(
+                status=403, message="You have been logged out, pls login again"
+            )
     except UserDoesNotExist as e:
         return create_response(success=False, message=e.message, status=403)
     except Exception as e:
@@ -156,4 +158,3 @@ def authenticate():
 @bp.route("/csrf-token", methods=["GET"])
 def get_anti_csrf_token():
     return {"myCsrfToken": csrf.generate_csrf()}
-

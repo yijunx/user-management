@@ -73,7 +73,6 @@ def update_user_logout_time(item_id: str, logout_at: datetime) -> None:
         db_item.last_logout = datetime.now(timezone.utc)
 
 
-
 # @authorize(action=SpecificResourceActionsEnum.patch)
 # def patch_item(item_id: str, user: User, item_patch: ItemPatch) -> Item:
 #     with get_db() as db:
