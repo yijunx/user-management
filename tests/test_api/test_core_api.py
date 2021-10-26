@@ -53,6 +53,14 @@ def test_register_user_with_password(
     assert user_in_response.name == user_register_with_password.name
 
 
+def test_register_same_user_with_password(
+    client: FlaskClient, user_register_with_password: UserRegisterWithPassword
+):
+    r = client.post("/api/register", json=user_register_with_password.dict())
+    assert r.status_code == 409
+    assert r.get_json()["success"] == False
+
+
 def test_login_user_with_password(
     client: FlaskClient, user_login_with_password: UserLoginWithPassword
 ):
