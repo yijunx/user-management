@@ -1,6 +1,12 @@
 import jwt
 import os
-from app.schemas.user import GoogleUser, User, UserInResponse, UserWithToken
+from app.schemas.user import (
+    GoogleUser,
+    User,
+    UserInDecodedToken,
+    UserInResponse,
+    UserWithToken,
+)
 from flask import Request, abort
 from datetime import datetime, timedelta, timezone
 from flask import Request
@@ -62,17 +68,18 @@ def get_token_from_authorization_header(request: Request) -> str:
     return token
 
 
-def get_user_info_from_request(request: Request) -> User:
+def get_user_info_from_request(request: Request) -> UserInDecodedToken:
     """
     As the user-management will only issue httpOnly token,
     react frontend cannot get it. and chrome will only add the token
     in the cookie accompanying the request sent to the server.
+    This is for anthenticate endpoint
     """
     token = get_token_from_cookie(request)
     if token is None:
         abort(401, "no token!!!")
     else:
-        user = User(**decode_token(token=token))
+        user = UserInDecodedToken(**decode_token(token=token))
         return user
 
 
@@ -90,4 +97,3 @@ def get_google_user_from_request(request: Request) -> GoogleUser:
     )
     r.raise_for_status()
     return GoogleUser(**r.json())
-

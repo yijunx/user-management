@@ -57,6 +57,19 @@ def get_user_with_email(email: str) -> User:
     return item
 
 
+def update_user_login_time(item_id: str) -> None:
+    with get_db() as db:
+        db_item = userRepo.get(db=db, item_id=item_id)
+        db_item.last_login = datetime.now(timezone.utc)
+
+
+def update_user_logout_time(item_id: str, logout_at: datetime) -> None:
+    with get_db() as db:
+        db_item = userRepo.get(db=db, item_id=item_id)
+        db_item.last_logout = datetime.now(timezone.utc)
+
+
+
 # @authorize(action=SpecificResourceActionsEnum.patch)
 # def patch_item(item_id: str, user: User, item_patch: ItemPatch) -> Item:
 #     with get_db() as db:

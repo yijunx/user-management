@@ -16,7 +16,7 @@ class User(Base):
     login_method = Column(String, nullable=False)
 
     # timing info
-    last_login = Column(DateTime, nullable=False)
+    last_login = Column(DateTime, nullable=True)
     last_logout = Column(DateTime, nullable=True)
 
     # password info for those login with password

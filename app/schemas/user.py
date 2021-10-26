@@ -39,9 +39,17 @@ class User(UserCreate):
 
 
 class UserInResponse(BaseModel):
+    """this is the token payload"""
+
     id: str
     name: str
     login_method: LoginMethodEnum
+
+
+class UserInDecodedToken(UserInResponse):
+    exp: datetime
+    iat: datetime
+    iss: str
 
 
 class UserPatch(BaseModel):
@@ -62,7 +70,3 @@ class GoogleUser(BaseModel):
     name: str
     email: str
     picture: str
-
-
-
-
