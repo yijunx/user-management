@@ -13,3 +13,4 @@ def db():
         raise
     finally:
         session.close()
+

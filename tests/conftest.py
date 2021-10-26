@@ -10,7 +10,13 @@ def user_create_google_dict():
 
 @pytest.fixture
 def user_create_password_dict():
-    return {"name": "test_password", "email": "test@test.com", "login_method": "password", "salt": "salt", "hased_password": "hash"}
+    return {
+        "name": "test_password",
+        "email": "test@test.com",
+        "login_method": "password",
+        "salt": "salt",
+        "hased_password": "hash",
+    }
 
 
 @pytest.fixture
@@ -21,4 +27,3 @@ def user_create_google(user_create_google_dict: Dict):
 @pytest.fixture
 def user_create_password(user_create_password_dict: Dict):
     return UserCreate(**user_create_password_dict)
-

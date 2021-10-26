@@ -33,9 +33,11 @@ class UserCreate(BaseModel):
 
 class User(UserCreate):
     id: str
-    last_login: datetime
-    last_logout: datetime
+    last_login: Optional[datetime]
+    last_logout: Optional[datetime]
     email_verified: bool
+    class Config:
+        orm_mode = True
 
 
 class UserInResponse(BaseModel):
@@ -57,7 +59,7 @@ class UserPatch(BaseModel):
     password: Optional[str]
 
 
-class UserWithToken(User):
+class UserWithToken(UserInResponse):
     access_token: str
 
 
@@ -69,4 +71,4 @@ class UserWithPaging(BaseModel):
 class GoogleUser(BaseModel):
     name: str
     email: str
-    picture: str
+    picture: Optional[str]

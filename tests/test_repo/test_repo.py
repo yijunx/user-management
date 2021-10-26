@@ -40,7 +40,6 @@ def test_get_password_user_by_name(db: Session, user_create_password: UserCreate
     assert db_item.id == PASSWORD_USER_ID
 
 
-
 def test_cannot_get_user_by_wrong_id(db: Session):
     with pytest.raises(UserDoesNotExist):
         userRepo.get(db=db, item_id="wrong id")
@@ -48,7 +47,9 @@ def test_cannot_get_user_by_wrong_id(db: Session):
 
 def test_list_items(db: Session):
     db_items, paging = userRepo.get_all(
-        db=db, item_ids=[GOOGLE_USER_ID, PASSWORD_USER_ID], query_pagination=QueryPagination()
+        db=db,
+        item_ids=[GOOGLE_USER_ID, PASSWORD_USER_ID],
+        query_pagination=QueryPagination(),
     )
     ids = [x.id for x in db_items]
     assert GOOGLE_USER_ID in ids

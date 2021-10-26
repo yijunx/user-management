@@ -10,19 +10,21 @@ from app.casbin.role_definition import (
 )
 from app.service.util import get_resource_id, get_item_id, authorize
 from app.util.password import create_hashed_password
-from app.config.app_config import conf
 import app.repo.user as userRepo
+from typing import Union
 
 
-def create_user_with_google_login(name: str, email: str):
+def create_user_with_google_login(name: str, email: str) -> User:
     user_create = UserCreate(
         name=name, email=email, login_method=LoginMethodEnum.google
     )
     with get_db() as db:
-        userRepo.create(db=db, item_create=user_create)
+        db_item = userRepo.create(db=db, item_create=user_create)
+        user = User.from_orm(db_item)
+    return user
 
 
-def create_user_with_password(name: str, email: str, password):
+def create_user_with_password(name: str, email: str, password) -> User:
     salt, hashed_password = create_hashed_password(password=password)
     user_create = UserCreate(
         name=name,
@@ -32,7 +34,9 @@ def create_user_with_password(name: str, email: str, password):
         hashed_password=hashed_password,
     )
     with get_db() as db:
-        userRepo.create(db=db, item_create=user_create)
+        db_item = userRepo.create(db=db, item_create=user_create)
+        user = User.from_orm(db_item)
+    return user
 
 
 def list_users(query_pagination: QueryPagination) -> UserWithPaging:
@@ -50,10 +54,10 @@ def get_user(item_id: str) -> User:
     return item
 
 
-def get_user_with_email(email: str) -> User:
+def get_user_with_email(email: str) -> Union[User, None]:
     with get_db() as db:
         db_item = userRepo.get_by_email(db=db, email=email)
-        item = User.from_orm(db_item)
+        item = None if db_item is None else User.from_orm(db_item)
     return item
 
 

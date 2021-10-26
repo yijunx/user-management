@@ -2,6 +2,7 @@
 from flask import Blueprint, request
 from flask_pydantic import validate
 from app.schemas.user import (
+    GoogleUser,
     LoginMethodEnum,
     UserInResponse,
     UserLoginWithPassword,
@@ -74,16 +75,17 @@ def login_with_google():
     # or by sending a GET request to https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=YOUR_TOKEN_HERE
     # if the user is not there, create the user...
 
-    google_user = get_google_user_from_request(reuqest=request)
-    # we need to check if the client id matches!
-    # create the user!!!
+    print("login with google request is here..")
+    google_user: GoogleUser = get_google_user_from_request(request=request)
     user = userService.get_user_with_email(email=google_user.email)
     if user is None:
         try:
-            userService.create_user_with_google_login(
+            print("try creating user...")
+            user = userService.create_user_with_google_login(
                 name=google_user.name, email=google_user.email
             )
         except UserEmailAlreadyExist as e:
+            # well suddenly email is used... there might be such instances..
             return create_response(
                 success=False, message=str(e), status_code=e.status_code
             )
@@ -98,13 +100,13 @@ def login_with_google():
                 message="please login with email password",
             )
         
-        # now user is good...
-        userService.update_user_login_time(item_id=user.id)
-        user_with_token = encode_token(user_in_reponse=UserInResponse(**user.dict()))
-        return create_response(
-            response=user_with_token,
-            cookies={"token": user_with_token.access_token},
-        )
+    # now user is good...
+    userService.update_user_login_time(item_id=user.id)
+    user_with_token = encode_token(user_in_reponse=UserInResponse(**user.dict()))
+    return create_response(
+        response=user_with_token,
+        cookies={"token": user_with_token.access_token},
+    )
 
 
 @bp.route("/logout", methods=["POST"])
