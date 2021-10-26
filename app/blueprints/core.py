@@ -31,14 +31,16 @@ logger = get_logger(__name__)
 @validate()
 def password_user_register(body: UserRegisterWithPassword):
     try:
-        userService.create_user_with_password(
+        user = userService.create_user_with_password(
             name=body.name, email=body.email, password=body.password
         )
+        user_in_response = UserInResponse(**user.dict())
     except UserEmailAlreadyExist as e:
         return create_response(success=False, message=str(e), status_code=e.status_code)
     except Exception as e:
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
+    return create_response(success=True, status_code=201, response=user_in_response)
 
 
 @bp.route("/login", methods=["POST"])
@@ -61,10 +63,11 @@ def login_with_password(body: UserLoginWithPassword):
             success=False, status_code=401, message="Email or Password is incorrect"
         )
     userService.update_user_login_time(item_id=user.id)
-    user_with_token = encode_token(user_in_reponse=UserInResponse(**user.dict()))
+    user_in_reponse = UserInResponse(**user.dict())
+    access_token = encode_token(user_in_reponse=user_in_reponse)
     return create_response(
-        response=user_with_token,
-        cookies={"token": user_with_token.access_token},
+        response=user_in_reponse,
+        cookies={"token": access_token},
     )
 
 
@@ -102,10 +105,11 @@ def login_with_google():
         
     # now user is good...
     userService.update_user_login_time(item_id=user.id)
-    user_with_token = encode_token(user_in_reponse=UserInResponse(**user.dict()))
+    user_in_reponse=UserInResponse(**user.dict())
+    access_token = encode_token(user_in_reponse=user_in_reponse)
     return create_response(
-        response=user_with_token,
-        cookies={"token": user_with_token.access_token},
+        response=user_in_reponse,
+        cookies={"token": access_token},
     )
 
 

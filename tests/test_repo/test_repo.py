@@ -2,7 +2,6 @@ import pytest
 import app.repo.user as userRepo
 from app.schemas.pagination import QueryPagination
 from app.schemas.user import UserCreate
-from app.schemas.user import User
 from sqlalchemy.orm import Session
 from app.exceptions.user import UserEmailAlreadyExist, UserDoesNotExist
 

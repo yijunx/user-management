@@ -59,10 +59,6 @@ class UserPatch(BaseModel):
     password: Optional[str]
 
 
-class UserWithToken(UserInResponse):
-    access_token: str
-
-
 class UserWithPaging(BaseModel):
     data: List[UserInResponse]
     paging: ResponsePagination

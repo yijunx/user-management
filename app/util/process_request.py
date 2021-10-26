@@ -2,10 +2,8 @@ import jwt
 import os
 from app.schemas.user import (
     GoogleUser,
-    User,
     UserInDecodedToken,
     UserInResponse,
-    UserWithToken,
 )
 from flask import Request, abort
 from datetime import datetime, timedelta, timezone
@@ -31,7 +29,7 @@ def get_private_key():
     return key
 
 
-def encode_token(user_in_reponse: UserInResponse) -> UserWithToken:
+def encode_token(user_in_reponse: UserInResponse) -> str:
     additional_token_payload = {
         "exp": datetime.now(timezone.utc) + timedelta(seconds=60 * 60 * 8),
         "iat": datetime.now(timezone.utc),
@@ -44,7 +42,7 @@ def encode_token(user_in_reponse: UserInResponse) -> UserWithToken:
         key=get_private_key(),
         algorithm="RS256",
     )
-    return UserWithToken(**user_in_reponse.dict(), access_token=encoded)
+    return encoded
 
 
 def decode_token(token: str):
