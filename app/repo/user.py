@@ -9,7 +9,7 @@ from app.schemas.user import User, UserCreate
 from uuid import uuid4
 from datetime import datetime, timezone
 from app.repo.util import translate_query_pagination
-from app.exceptions.user import UserDoesNotExist
+from app.exceptions.user import UserDoesNotExist, UserEmailAlreadyExist
 from sqlalchemy.exc import IntegrityError
 
 
@@ -18,13 +18,18 @@ def create(db: Session, item_create: UserCreate) -> models.User:
         id=str(uuid4()),  # [let db create the id for us]
         name=item_create.name,
         email=item_create.email,
+        login_method=item_create.login_method,
+        salt=item_create.salt,
+        hashed_password=item_create.hashed_password,
+        # temporarily set this to true first
+        email_verified=True,
     )
     db.add(db_item)
     try:
         db.flush()
     except IntegrityError:
         db.rollback()
-        raise Exception("cannot create user due to integrity error")
+        raise UserEmailAlreadyExist(email=item_create.email)
     return db_item
 
 
@@ -46,7 +51,7 @@ def get(db: Session, item_id: str) -> models.User:
     return db_item
 
 
-def get_user_by_email(db: Session, email: str) -> Union[models.User, None]:
+def get_by_email(db: Session, email: str) -> Union[models.User, None]:
     db_item = db.query(models.User).filter(models.User.email == email).first()
     return db_item
 

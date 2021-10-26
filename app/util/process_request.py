@@ -1,11 +1,12 @@
 import jwt
 import os
-from app.schemas.user import User, UserWithToken
+from app.schemas.user import GoogleUser, User, UserInResponse, UserWithToken
 from flask import Request, abort
 from datetime import datetime, timedelta, timezone
 from flask import Request
 from cryptography import x509
 from app.config.app_config import conf
+import requests
 
 
 PRIVATE_KEY_LOCATION = os.path.join(conf.CERTS_DIR, conf.DOMAIN_NAME, "privkey1.pem")
@@ -24,20 +25,20 @@ def get_private_key():
     return key
 
 
-def encode_token(user: User) -> UserWithToken:
+def encode_token(user_in_reponse: UserInResponse) -> UserWithToken:
     additional_token_payload = {
         "exp": datetime.now(timezone.utc) + timedelta(seconds=60 * 60 * 8),
         "iat": datetime.now(timezone.utc),
         "iss": conf.DOMAIN_NAME,
     }
-    payload = user.dict()
+    payload = user_in_reponse.dict()
     payload.update(additional_token_payload)
     encoded = jwt.encode(
         payload=payload,
         key=get_private_key(),
         algorithm="RS256",
     )
-    return UserWithToken(**user.dict(), access_token=encoded)
+    return UserWithToken(**user_in_reponse.dict(), access_token=encoded)
 
 
 def decode_token(token: str):
@@ -73,3 +74,20 @@ def get_user_info_from_request(request: Request) -> User:
     else:
         user = User(**decode_token(token=token))
         return user
+
+
+def get_google_user_from_request(request: Request) -> GoogleUser:
+    """used when ends sends request here after user logined in with google
+    Here we need to verify with google if the id_token is valid
+    """
+    auth_header: str = request.headers.get("Authorization", None)
+    if auth_header is None:
+        abort(401, "no id token!!!")
+    id_token = auth_header.split(" ")[1]
+    r = requests.get(
+        url="https://www.googleapis.com/oauth2/v3/tokeninfo",
+        params={"id_token": id_token},
+    )
+    r.raise_for_status()
+    return GoogleUser(**r.json())
+

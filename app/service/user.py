@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from app.db.database import get_db
 from app.schemas.pagination import QueryPagination
-from app.schemas.user import UserCreate, User, UserWithPaging
+from app.schemas.user import LoginMethodEnum, UserCreate, User, UserWithPaging
 from app.schemas.casbin_rule import CasbinPolicy
 from app.casbin.role_definition import (
     SpecificResourceRightsEnum,
@@ -9,30 +9,33 @@ from app.casbin.role_definition import (
     PolicyTypeEnum,
 )
 from app.service.util import get_resource_id, get_item_id, authorize
+from app.util.password import create_hashed_password
 from app.config.app_config import conf
 import app.repo.user as userRepo
 
 
-def create_item(item_create: UserCreate) -> User:
-    # here it means every body can post
-    # here we can add decorator to let only admin user can create item...
+def create_user_with_google_login(name: str, email: str):
+    user_create = UserCreate(
+        name=name, email=email, login_method=LoginMethodEnum.google
+    )
     with get_db() as db:
-        db_item = userRepo.create(db=db, item_create=item_create)
-        item = User.from_orm(db_item)
-        # well we need to think about casbin rule later...
-        # casbin_policy = CasbinPolicy(
-        #     ptype=PolicyTypeEnum.p,
-        #     v0=user.id,
-        #     v1=get_resource_id(item_id=item.id),
-        #     v2=SpecificResourceRightsEnum.own,
-        #     created_at=datetime.now(timezone.utc),
-        #     created_by=user.id,
-        # )
-        # casbinruleRepo.create(db=db, casbin_policy=casbin_policy)
-    return item
+        userRepo.create(db=db, item_create=user_create)
 
 
-def list_items(query_pagination: QueryPagination) -> UserWithPaging:
+def create_user_with_password(name: str, email: str, password):
+    salt, hashed_password = create_hashed_password(password=password)
+    user_create = UserCreate(
+        name=name,
+        email=email,
+        login_method=LoginMethodEnum.password,
+        salt=salt,
+        hashed_password=hashed_password,
+    )
+    with get_db() as db:
+        userRepo.create(db=db, item_create=user_create)
+
+
+def list_users(query_pagination: QueryPagination) -> UserWithPaging:
     with get_db() as db:
         db_items, paging = userRepo.get_all(db=db, query_pagination=query_pagination)
         items = [User.from_orm(x) for x in db_items]
@@ -40,9 +43,16 @@ def list_items(query_pagination: QueryPagination) -> UserWithPaging:
 
 
 # @authorize(action=SpecificResourceActionsEnum.get)
-def get_item(item_id: str) -> User:
+def get_user(item_id: str) -> User:
     with get_db() as db:
         db_item = userRepo.get(db=db, item_id=item_id)
+        item = User.from_orm(db_item)
+    return item
+
+
+def get_user_with_email(email: str) -> User:
+    with get_db() as db:
+        db_item = userRepo.get_by_email(db=db, email=email)
         item = User.from_orm(db_item)
     return item
 
