@@ -3,11 +3,8 @@ from sqlalchemy.sql.expression import and_, or_
 from app.schemas.pagination import QueryPagination, ResponsePagination
 from app.db.models import models
 from sqlalchemy.orm import Session
-
-# from uuid import uuid4
-from app.schemas.user import User, UserCreate
+from app.schemas.user import UserCreate
 from uuid import uuid4
-from datetime import datetime, timezone
 from app.repo.util import translate_query_pagination
 from app.exceptions.user import UserDoesNotExist, UserEmailAlreadyExist
 from sqlalchemy.exc import IntegrityError
@@ -47,24 +44,13 @@ def delete(db: Session, item_id: str) -> None:
 def get(db: Session, item_id: str) -> models.User:
     db_item = db.query(models.User).filter(models.User.id == item_id).first()
     if not db_item:
-        raise UserDoesNotExist(item_id=item_id)
+        raise UserDoesNotExist(user_id=item_id)
     return db_item
 
 
 def get_by_email(db: Session, email: str) -> Union[models.User, None]:
     db_item = db.query(models.User).filter(models.User.email == email).first()
     return db_item
-
-
-# def patch(db: Session, item_id: str, item_patch: ItemPatch, user: User) -> models.Item:
-#     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
-#     if not db_item:
-#         raise ItemDoesNotExist(item_id=item_id)
-#     else:
-#         db_item.description = item_patch.description
-#         # and log the user id, stuff into the db_item,
-#         # like last_modified_by, at stuff
-#     return db_item
 
 
 def get_all(

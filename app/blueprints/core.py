@@ -119,10 +119,9 @@ def authenticate():
     # so here we need to check user.last_logout vs token's iat..
     print(request.headers)
     user_in_token = get_user_info_from_request(request=request)
-
     try:
         user = userService.get_user(item_id=user_in_token.id)
-        if user_in_token.iat >= user.last_logout:
+        if user_in_token.iat > user.last_logout:
             return create_response(status=200, message="welcome")
         else:
             return create_response(status=403, message="You have been logged out, pls login again")
