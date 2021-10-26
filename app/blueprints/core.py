@@ -30,6 +30,21 @@ logger = get_logger(__name__)
 @bp.route("/register", methods=["POST"])
 @validate()
 def password_user_register(body: UserRegisterWithPassword):
+    """
+    register user email and password login info.
+    However this is not the correct way..
+
+    the correct way..
+    POST register -> created a line in db with email_verified -> False
+    and user cannot login yet, and the account will be deleted in 7 days
+
+    then, use the sendgrip api to send a link to the email
+    the link is got GET /api/verify_email?some_info_here=<user_in_response.dict() | encode_with_privatekey>
+    user clicks the link in the email
+    the backend will receive the request, then decode the token,
+    check the email in the jwt is same as the one in db
+    and the user can login
+    """
     try:
         user = userService.create_user_with_password(
             name=body.name, email=body.email, password=body.password
