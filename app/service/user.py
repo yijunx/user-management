@@ -33,7 +33,7 @@ def create_user_with_password(name: str, email: str, password) -> User:
         login_method=LoginMethodEnum.password,
         salt=salt,
         hashed_password=hashed_password,
-        email_verified=False
+        email_verified=False,
     )
     with get_db() as db:
         db_item = userRepo.create(db=db, item_create=user_create)

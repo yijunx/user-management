@@ -33,7 +33,6 @@ class UserCreate(BaseModel):
     email_verified: Optional[bool]
 
 
-
 class User(UserCreate):
     id: str
     last_login: Optional[datetime]

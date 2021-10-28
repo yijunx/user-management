@@ -67,9 +67,14 @@ def encode_access_token(user_in_reponse: UserInResponse) -> str:
     return encoded
 
 
-def decode_token(token: str) -> Dict[str, Any]:
+def decode_token(token: str, verify_exp: bool = True) -> Dict[str, Any]:
     try:
-        data = jwt.decode(jwt=token, key=get_public_key(), algorithms=["RS256"])
+        data = jwt.decode(
+            jwt=token,
+            key=get_public_key(),
+            algorithms=["RS256"],
+            options={"verify_exp": verify_exp},
+        )
     except Exception as e:
         print("Error in decoding token")
         print(str(e))
@@ -90,7 +95,9 @@ def get_token_from_authorization_header(request: Request) -> str:
     return token
 
 
-def get_user_info_from_request(request: Request) -> UserInDecodedToken:
+def get_user_info_from_request(
+    request: Request, verify_exp: bool = True
+) -> UserInDecodedToken:
     """
     As the user-management will only issue httpOnly token,
     react frontend cannot get it. and chrome will only add the token
@@ -101,7 +108,7 @@ def get_user_info_from_request(request: Request) -> UserInDecodedToken:
     if token is None:
         abort(401, "no token!!!")
     else:
-        user = UserInDecodedToken(**decode_token(token=token))
+        user = UserInDecodedToken(**decode_token(token=token, verify_exp=verify_exp))
         return user
 
 

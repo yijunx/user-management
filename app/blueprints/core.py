@@ -171,7 +171,7 @@ def authenticate():
     user_in_token = get_user_info_from_request(request=request)
     try:
         user = userService.get_user(item_id=user_in_token.id)
-        if user_in_token.iat > user.last_logout:
+        if user.last_logout is None or user_in_token.iat > user.last_logout:
             return create_response(status=200, message="welcome")
         else:
             return create_response(
