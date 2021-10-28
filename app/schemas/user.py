@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel
 from app.casbin.role_definition import SpecificResourceRightsEnum
 from typing import List, Optional
@@ -26,11 +26,11 @@ class UserRegisterWithPassword(BaseModel):
 class UserCreate(BaseModel):
     name: str
     email: str
-    created_at: datetime
+    created_at: datetime = datetime.now(timezone.utc)
     login_method: LoginMethodEnum
     salt: Optional[str]
     hashed_password: Optional[str]
-    email_verified: bool
+    email_verified: Optional[bool]
 
 
 

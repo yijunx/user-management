@@ -11,6 +11,7 @@ from flask import Request, abort
 from datetime import datetime, timedelta, timezone
 from flask import Request
 from cryptography import x509
+from cryptography.hazmat.backends import default_backend
 from app.config.app_config import conf
 import requests
 
@@ -21,8 +22,9 @@ PUBLIC_CERT_LOCATION = os.path.join(conf.CERTS_DIR, conf.DOMAIN_NAME, "cert1.pem
 
 def get_public_key():
     with open(PUBLIC_CERT_LOCATION, "rb") as f:
-        cert = x509.load_der_x509_certificate(f.read())
-    return cert.public_key()
+        cert = x509.load_pem_x509_certificate(f.read(), backend=default_backend())
+        key = cert.public_key()
+    return key
 
 
 def get_private_key():
@@ -67,8 +69,10 @@ def encode_access_token(user_in_reponse: UserInResponse) -> str:
 
 def decode_token(token: str) -> Dict[str, Any]:
     try:
-        data = jwt.decode(jwt=token, key=get_public_key, algorithms=["RS256"])
-    except:
+        data = jwt.decode(jwt=token, key=get_public_key(), algorithms=["RS256"])
+    except Exception as e:
+        print("Error in decoding token")
+        print(str(e))
         abort(401, "Cannot decode token!")
     return data
 

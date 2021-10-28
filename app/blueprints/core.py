@@ -70,9 +70,9 @@ def password_user_register(body: UserRegisterWithPassword):
 
 @bp.route("/email_verification", methods=["GET"])
 @validate()
-def verify_email(params: UserEmailVerificationParam):
+def verify_email(query: UserEmailVerificationParam):
     user_in_email_verification = UserInEmailVerification(
-        **decode_token(token=params.token)
+        **decode_token(token=query.token)
     )
     user = userService.get_user(item_id=user_in_email_verification.id)
     if user.email_verified:
