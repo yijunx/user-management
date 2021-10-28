@@ -17,7 +17,6 @@ PASSWORD_LOGIN_USER_ID = ""
 EMAIL_VERIFICATION_TOKEN = ""
 
 
-
 @patch(
     "app.blueprints.core.get_google_user_from_request",
     return_value=fixture.fake_google_user(),
@@ -45,11 +44,13 @@ def test_login_without_user_creation_with_google(
     assert r.status_code == 200
     assert user_in_response.name == fixture.fake_google_user().name
 
-@patch(
-    "app.blueprints.core.send_email_verification"
-)
+
+@patch("app.blueprints.core.send_email_verification")
 def test_register_user_with_password(
-    mock_send_email_verification, client: FlaskClient, user_register_with_password: UserRegisterWithPassword, db: Session
+    mock_send_email_verification,
+    client: FlaskClient,
+    user_register_with_password: UserRegisterWithPassword,
+    db: Session,
 ):
     r = client.post("/api/register", json=user_register_with_password.dict())
     user_in_response = UserInResponse(**r.get_json()["response"])
@@ -83,11 +84,10 @@ def test_login_user_with_password_without_email_verified(
     # assert user_in_response.id == PASSWORD_LOGIN_USER_ID
 
 
-def test_verify_user_email(
-    client: FlaskClient,
-    db: Session
-):
-    r = client.get("/api/email_verification", query_string={"token": EMAIL_VERIFICATION_TOKEN})
+def test_verify_user_email(client: FlaskClient, db: Session):
+    r = client.get(
+        "/api/email_verification", query_string={"token": EMAIL_VERIFICATION_TOKEN}
+    )
     print(r.get_data())
     user_in_db = userRepo.get(db=db, item_id=PASSWORD_LOGIN_USER_ID)
     assert user_in_db.email_verified == True
