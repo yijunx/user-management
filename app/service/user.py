@@ -29,6 +29,7 @@ def create_user_with_password(name: str, email: str, password) -> User:
     user_create = UserCreate(
         name=name,
         email=email,
+        created_at=datetime.now(timezone.utc),
         login_method=LoginMethodEnum.password,
         salt=salt,
         hashed_password=hashed_password,

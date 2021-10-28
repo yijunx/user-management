@@ -11,6 +11,7 @@ class User(Base):
     id = Column(String, primary_key=True, index=True)
     name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
+    created_at = Column(DateTime, nullable=False)
 
     # login method is password or google
     login_method = Column(String, nullable=False)

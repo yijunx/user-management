@@ -26,10 +26,12 @@ class UserRegisterWithPassword(BaseModel):
 class UserCreate(BaseModel):
     name: str
     email: str
+    created_at: datetime
     login_method: LoginMethodEnum
     salt: Optional[str]
     hashed_password: Optional[str]
     email_verified: bool
+
 
 
 class User(UserCreate):
