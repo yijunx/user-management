@@ -18,8 +18,7 @@ def create(db: Session, item_create: UserCreate) -> models.User:
         login_method=item_create.login_method,
         salt=item_create.salt,
         hashed_password=item_create.hashed_password,
-        # temporarily set this to true first
-        email_verified=True,
+        email_verified=item_create.email_verified,
     )
     db.add(db_item)
     try:

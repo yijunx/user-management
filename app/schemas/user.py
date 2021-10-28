@@ -29,21 +29,19 @@ class UserCreate(BaseModel):
     login_method: LoginMethodEnum
     salt: Optional[str]
     hashed_password: Optional[str]
+    email_verified: bool
 
 
 class User(UserCreate):
     id: str
     last_login: Optional[datetime]
     last_logout: Optional[datetime]
-    email_verified: bool
 
     class Config:
         orm_mode = True
 
 
 class UserInResponse(BaseModel):
-    """this is the token payload"""
-
     id: str
     name: str
     login_method: LoginMethodEnum
@@ -69,3 +67,11 @@ class GoogleUser(BaseModel):
     name: str
     email: str
     picture: Optional[str]
+
+
+class UserEmailVerificationParam(BaseModel):
+    token: str
+
+
+class UserInEmailVerification(UserInResponse):
+    salt: str

@@ -32,6 +32,7 @@ def create_user_with_password(name: str, email: str, password) -> User:
         login_method=LoginMethodEnum.password,
         salt=salt,
         hashed_password=hashed_password,
+        email_verified=False
     )
     with get_db() as db:
         db_item = userRepo.create(db=db, item_create=user_create)
@@ -67,7 +68,13 @@ def update_user_login_time(item_id: str) -> None:
         db_item.last_login = datetime.now(timezone.utc)
 
 
-def update_user_logout_time(item_id: str, logout_at: datetime) -> None:
+def update_user_email_verified(item_id: str) -> None:
+    with get_db() as db:
+        db_item = userRepo.get(db=db, item_id=item_id)
+        db_item.email_verified = True
+
+
+def update_user_logout_time(item_id: str) -> None:
     with get_db() as db:
         db_item = userRepo.get(db=db, item_id=item_id)
         db_item.last_logout = datetime.now(timezone.utc)

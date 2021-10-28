@@ -4,20 +4,25 @@ from flask_pydantic import validate
 from app.schemas.user import (
     GoogleUser,
     LoginMethodEnum,
+    UserEmailVerificationParam,
+    UserInEmailVerification,
     UserInResponse,
     UserLoginWithPassword,
     UserRegisterWithPassword,
 )
+from app.util.email_handler import send_email_verification
 from app.util.response_util import create_response
 import app.service.user as userService
 from app.util.app_logging import get_logger
 from app.util.process_request import (
+    decode_token,
     get_user_info_from_request,
     get_google_user_from_request,
+    encode_access_token,
+    encode_email_verification_token,
 )
 from app.exceptions.user import UserDoesNotExist, UserEmailAlreadyExist
 from flask_wtf import csrf
-from app.util.process_request import encode_token
 from app.util.password import verify_password
 
 # from app.exceptions.item import ItemDoesNotExist, ItemNameIsAlreadyThere
@@ -49,6 +54,11 @@ def password_user_register(body: UserRegisterWithPassword):
         user = userService.create_user_with_password(
             name=body.name, email=body.email, password=body.password
         )
+        # now send the email
+        token = encode_email_verification_token(
+            user_in_email_verification=UserInEmailVerification(**user.dict())
+        )
+        send_email_verification(token=token, user_email=user.email, user_name=user.name)
         user_in_response = UserInResponse(**user.dict())
     except UserEmailAlreadyExist as e:
         return create_response(success=False, message=str(e), status_code=e.status_code)
@@ -56,6 +66,21 @@ def password_user_register(body: UserRegisterWithPassword):
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
     return create_response(success=True, status_code=201, response=user_in_response)
+
+
+@bp.route("/email_verification", methods=["GET"])
+@validate()
+def verify_email(params: UserEmailVerificationParam):
+    user_in_email_verification = UserInEmailVerification(
+        **decode_token(token=params.token)
+    )
+    user = userService.get_user(item_id=user_in_email_verification.id)
+    if user.email_verified:
+        return create_response(success=True)
+    if user.salt == user_in_email_verification.salt:
+        userService.update_user_email_verified(item_id=user.id)
+        return create_response(success=True)
+    return create_response(success=False, status_code=400)
 
 
 @bp.route("/login", methods=["POST"])
@@ -69,7 +94,7 @@ def login_with_password(body: UserLoginWithPassword):
         )
     if user.login_method != LoginMethodEnum.password:
         return create_response(
-            success=False, status_code=400, message="Please login with google"
+            success=False, status_code=409, message="Please login with google"
         )
     if not verify_password(
         password=body.password, salt=user.salt, hashed_password=user.hashed_password
@@ -77,9 +102,13 @@ def login_with_password(body: UserLoginWithPassword):
         return create_response(
             success=False, status_code=401, message="Email or Password is incorrect"
         )
+    if not user.email_verified:
+        return create_response(
+            success=False, status_code=406, message="Email not verified"
+        )
     userService.update_user_login_time(item_id=user.id)
     user_in_reponse = UserInResponse(**user.dict())
-    access_token = encode_token(user_in_reponse=user_in_reponse)
+    access_token = encode_access_token(user_in_reponse=user_in_reponse)
     return create_response(
         response=user_in_reponse,
         cookies={"token": access_token},
@@ -121,7 +150,7 @@ def login_with_google():
     # now user is good...
     userService.update_user_login_time(item_id=user.id)
     user_in_reponse = UserInResponse(**user.dict())
-    access_token = encode_token(user_in_reponse=user_in_reponse)
+    access_token = encode_access_token(user_in_reponse=user_in_reponse)
     return create_response(
         response=user_in_reponse,
         cookies={"token": access_token},

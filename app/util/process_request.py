@@ -1,8 +1,10 @@
+from typing import Any, Dict
 import jwt
 import os
 from app.schemas.user import (
     GoogleUser,
     UserInDecodedToken,
+    UserInEmailVerification,
     UserInResponse,
 )
 from flask import Request, abort
@@ -29,7 +31,25 @@ def get_private_key():
     return key
 
 
-def encode_token(user_in_reponse: UserInResponse) -> str:
+def encode_email_verification_token(
+    user_in_email_verification: UserInEmailVerification,
+) -> str:
+    additional_token_payload = {
+        "exp": datetime.now(timezone.utc) + timedelta(seconds=60 * 60 * 48),
+        "iat": datetime.now(timezone.utc),
+        "iss": conf.DOMAIN_NAME,
+    }
+    payload = user_in_email_verification.dict()
+    payload.update(additional_token_payload)
+    encoded = jwt.encode(
+        payload=payload,
+        key=get_private_key(),
+        algorithm="RS256",
+    )
+    return encoded
+
+
+def encode_access_token(user_in_reponse: UserInResponse) -> str:
     additional_token_payload = {
         "exp": datetime.now(timezone.utc) + timedelta(seconds=60 * 60 * 8),
         "iat": datetime.now(timezone.utc),
@@ -45,11 +65,11 @@ def encode_token(user_in_reponse: UserInResponse) -> str:
     return encoded
 
 
-def decode_token(token: str):
+def decode_token(token: str) -> Dict[str, Any]:
     try:
         data = jwt.decode(jwt=token, key=get_public_key, algorithms=["RS256"])
     except:
-        abort(401, "Decode token error!")
+        abort(401, "Cannot decode token!")
     return data
 
 
