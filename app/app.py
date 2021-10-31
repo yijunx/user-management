@@ -20,8 +20,8 @@ logger = get_logger(__name__)
 app = Flask(__name__)
 app.secret_key = conf.APP_SECRET  # for the csrf to work
 init_logger(app=app)
+
 CSRFProtect(app)
-# app.json_encoder = some custom json encoder... (to deal with some datetime issues)
 
 
 class CustomJSONEncoder(JSONEncoder):
@@ -39,7 +39,7 @@ class CustomJSONEncoder(JSONEncoder):
 
 app.config["REQUEST_ID_UNIQUE_VALUE_PREFIX"] = ""
 RequestID(app)
-CORS(app, resources={r"/api/*": {"origins": conf.CORS_ALLOWED_ORIGINS}})
+CORS(app, resources={r"/api/*": {"origins": conf.CORS_ALLOWED_ORIGINS.split(",")}})
 
 app.json_encoder = CustomJSONEncoder
 
