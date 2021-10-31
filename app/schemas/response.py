@@ -6,3 +6,4 @@ class StandardResponse(BaseModel):
     success: bool
     response: Any
     message: Optional[str]
+    error_code: Optional[int]

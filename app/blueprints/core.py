@@ -65,7 +65,7 @@ def password_user_register(body: UserRegisterWithPassword):
     except Exception as e:
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
-    return create_response(success=True, status_code=201, response=user_in_response)
+    return create_response(success=True, status_code=201, response=user_in_response, message="User registered, pls check email and verify it, pls pls pls")
 
 
 @bp.route("/email_verification", methods=["GET"])
@@ -87,6 +87,7 @@ def verify_email(query: UserEmailVerificationParam):
 @validate()
 def login_with_password(body: UserLoginWithPassword):
     # user_login = request.body_params
+    print(body)
     user = userService.get_user_with_email(email=body.email)
     if user is None:
         return create_response(
@@ -102,10 +103,15 @@ def login_with_password(body: UserLoginWithPassword):
         return create_response(
             success=False, status_code=401, message="Email or Password is incorrect"
         )
-    if not user.email_verified:
-        return create_response(
-            success=False, status_code=406, message="Email not verified"
-        )
+    # if not user.email_verified:
+    #     return create_response(
+    #         success=False, status_code=406, message="Email not verified"
+    #     )
+
+    # here is some notes about if email is verified.
+    # user without verified email cannot do anything
+    # can just login, and request verification email again
+
     userService.update_user_login_time(item_id=user.id)
     user_in_reponse = UserInResponse(**user.dict())
     access_token = encode_access_token(user_in_reponse=user_in_reponse)

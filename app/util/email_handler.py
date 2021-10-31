@@ -3,6 +3,7 @@
 import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+from app.config.app_config import conf
 
 
 def send_email_verification(token: str, user_email: str, user_name: str):
@@ -16,7 +17,7 @@ def send_email_verification(token: str, user_email: str, user_name: str):
         <br>
         <p>Please click below link to verify your email:</p>
         <br>
-        <p>f{"https://somedmainnamehere"}/email_verification?token={token}</p>
+        <p>https://{conf.DOMAIN_NAME}/email_verification?token={token}</p>
         
         """,
     )
