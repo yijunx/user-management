@@ -80,7 +80,7 @@ def test_login_user_with_password_without_email_verified(
 ):
     r = client.post("/api/login", json=user_login_with_password.dict())
     # user_in_response = UserInResponse(**r.get_json()["response"])
-    assert r.status_code == 406
+    assert r.status_code == 200  # well now we allow user login without email verified..
     # assert user_in_response.id == PASSWORD_LOGIN_USER_ID
 
 

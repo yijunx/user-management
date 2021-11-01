@@ -37,7 +37,7 @@ def encode_email_verification_token(
     user_in_email_verification: UserInEmailVerification,
 ) -> str:
     additional_token_payload = {
-        "exp": datetime.now(timezone.utc) + timedelta(seconds=60 * 60 * 48),
+        # "exp": datetime.now(timezone.utc) + timedelta(seconds=60 * 60 * 48),
         "iat": datetime.now(timezone.utc),
         "iss": conf.DOMAIN_NAME,
     }
