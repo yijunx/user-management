@@ -24,7 +24,9 @@ def create_response(
             resp.headers[k] = v
     if cookies:
         for k, v in cookies.items():
-            resp.set_cookie(key=k, value=v, httponly=True, secure=True)
+            resp.set_cookie(
+                key=k, value=v, httponly=True, secure=True, samesite="Strict"
+            )
     if cookies_to_delete:
         for key in cookies_to_delete:
             resp.delete_cookie(key=key)

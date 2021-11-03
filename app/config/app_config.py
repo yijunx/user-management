@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     CORS_ALLOWED_ORIGINS: str
     USER_ADMIN_ROLE_ID: str
 
-    RESOURCE_NAME: str = "users/"
+    RESOURCE_NAME_USER: str = "users/"
     OTHER_SERVICES_URL: str = "not set up yet"
 
 

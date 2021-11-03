@@ -2,6 +2,7 @@ import casbin_sqlalchemy_adapter
 import casbin
 from app.config.app_config import conf
 from app.casbin.role_definition import (
+    SpecificResourceActionsEnum,
     SpecificResourceRightsEnum,
     resource_right_action_mapping,
     ResourceActionsEnum,
@@ -41,7 +42,9 @@ def create_casbin_enforcer():
         admin users will have * in obj in the admin role policy, so admin user can
         do things on any resource
         """
-        if object_from_policy == "*":
+        if object_from_policy == "*" or object_from_request.startswith(
+            object_from_policy
+        ):
             return True
         else:
             return object_from_request == object_from_policy
