@@ -11,8 +11,8 @@ class PolicyTypeEnum(str, Enum):
 class ResourceRightsEnum(str, Enum):
     """one user of one resource can only be one of the below"""
 
-    own = "own"  # user is owner of the user resource
-    admin = "admin"  # user is admin
+    own = "own_right"  # user is owner of the user resource
+    admin = "admin_right"  # user is admin
 
 
 class ResourceActionsEnum(str, Enum):

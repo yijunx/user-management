@@ -130,3 +130,6 @@ dmypy.json
 
 # sendgrid
 sendgrid.env
+
+# admin user
+admin_user.env

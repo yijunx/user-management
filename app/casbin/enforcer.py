@@ -5,6 +5,8 @@ from app.casbin.role_definition import (
     ResourceRightsEnum,
     resource_right_action_mapping,
 )
+from app.casbin.seed import seed_or_get_admin_user
+import os
 
 
 def create_casbin_enforcer():
@@ -46,8 +48,8 @@ def create_casbin_enforcer():
     casbin_enforcer.add_policy(
         "admin-role-id", conf.RESOURCE_NAME_USER, ResourceRightsEnum.admin
     )
-    casbin_enforcer.add_grouping_policy("admin-user-id", "admin-role-id")
-    casbin_enforcer.add_grouping_policy("admin-user-id", "admin-role-id")
+    admin_user_id = seed_or_get_admin_user()
+    casbin_enforcer.add_grouping_policy(admin_user_id, "admin-role-id")
 
     # add a default admin user!!!
 

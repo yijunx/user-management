@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 from pydantic import BaseModel
-from app.casbin.role_definition import SpecificResourceRightsEnum
 from typing import List, Optional
 from enum import Enum
 from app.schemas.pagination import ResponsePagination

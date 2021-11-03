@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from app.casbin.resource_id_converter import get_resource_id_from_user_id
-from app.casbin.role_definition import SpecificResourceRightsEnum
+from app.casbin.role_definition import ResourceRightsEnum
 from app.db.database import get_db
 from app.schemas.user import LoginMethodEnum, UserCreate, User
 from app.util.password import create_hashed_password
@@ -20,7 +20,7 @@ def create_user_with_google_login(name: str, email: str) -> User:
         casbin_enforcer.add_policy(
             user.id,
             get_resource_id_from_user_id(user.id),
-            SpecificResourceRightsEnum.own,
+            ResourceRightsEnum.own,
         )
     return user
 
@@ -43,7 +43,7 @@ def create_user_with_password(name: str, email: str, password) -> User:
         casbin_enforcer.add_policy(
             user.id,
             get_resource_id_from_user_id(user.id),
-            SpecificResourceRightsEnum.own,
+            ResourceRightsEnum.own,
         )
     return user
 
