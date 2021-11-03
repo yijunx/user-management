@@ -21,7 +21,7 @@ app = Flask(__name__)
 app.secret_key = conf.APP_SECRET  # for the csrf to work
 init_logger(app=app)
 
-CSRFProtect(app)
+# CSRFProtect(app)
 
 
 class CustomJSONEncoder(JSONEncoder):

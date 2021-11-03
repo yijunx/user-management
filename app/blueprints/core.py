@@ -194,6 +194,6 @@ def authenticate():
         return create_response(success=False, message=str(e), status_code=500)
 
 
-@bp.route("/csrf-token", methods=["GET"])
-def get_anti_csrf_token():
-    return {"myCsrfToken": csrf.generate_csrf()}
+# @bp.route("/csrf-token", methods=["GET"])
+# def get_anti_csrf_token():
+#     return {"myCsrfToken": csrf.generate_csrf()}
