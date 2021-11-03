@@ -1,9 +1,12 @@
 from datetime import datetime, timezone
+from app.casbin.resource_id_converter import get_resource_id_from_user_id
+from app.casbin.role_definition import SpecificResourceRightsEnum
 from app.db.database import get_db
 from app.schemas.user import LoginMethodEnum, UserCreate, User
 from app.util.password import create_hashed_password
 import app.repo.user as userRepo
 from typing import Union
+from app.casbin.enforcer import casbin_enforcer
 
 
 def create_user_with_google_login(name: str, email: str) -> User:
@@ -13,6 +16,12 @@ def create_user_with_google_login(name: str, email: str) -> User:
     with get_db() as db:
         db_item = userRepo.create(db=db, item_create=user_create)
         user = User.from_orm(db_item)
+        # this user herself is the owner of herself
+        casbin_enforcer.add_policy(
+            user.id,
+            get_resource_id_from_user_id(user.id),
+            SpecificResourceRightsEnum.own,
+        )
     return user
 
 
@@ -30,6 +39,12 @@ def create_user_with_password(name: str, email: str, password) -> User:
     with get_db() as db:
         db_item = userRepo.create(db=db, item_create=user_create)
         user = User.from_orm(db_item)
+        # this user himself is the owner of himself
+        casbin_enforcer.add_policy(
+            user.id,
+            get_resource_id_from_user_id(user.id),
+            SpecificResourceRightsEnum.own,
+        )
     return user
 
 

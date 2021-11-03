@@ -8,51 +8,50 @@ class PolicyTypeEnum(str, Enum):
     g = "g"
 
 
-class SpecificResourceRightsEnum(str, Enum):
+class ResourceRightsEnum(str, Enum):
     """one user of one resource can only be one of the below"""
 
-    view = "view"  # user is viewer
-    edit = "edit"  # user is editor
-    own = "own"  # user is owner
+    own = "own"  # user is owner of the user resource
+    admin = "admin"  # user is admin
 
 
 class ResourceActionsEnum(str, Enum):
-    """actions to happen on resource/ without id"""
+    """these are the actions"""
 
-    get_all = "get_all"
-    create = "create"
-
-
-class SpecificResourceActionsEnum(str, Enum):
-    """these are the actions to happen on a resource/resource_id"""
-
-    get = "get"
-    download = "download"
-    patch = "patch"
-    share = "share"
-    unshare = "unshare"
+    # used when user view his detail page
+    get_detail = "get_detail"
+    # used when user update name or password or other profile
+    patch_detail = "patch_detail"
+    # used when user wants to delete himself...
     delete = "delete"
+    # used when user wants to list users and search
+    list_users = "list_users"
+    # used when admin wants to create a user
+    create_user = "create_user"
+    # used when admin wants to (un)ban a user
+    ban_user = "ban_user"
+    unban_user = "unban_user"
 
 
 # this is dynamic
 # this is make sure that, own covers edit, edit covers view
 # this also supports other relations, very customization
 resource_right_action_mapping: dict = {
-    SpecificResourceRightsEnum.view: {
-        SpecificResourceActionsEnum.get,
-        SpecificResourceActionsEnum.download,
+    ResourceRightsEnum.own: {
+        ResourceActionsEnum.get_detail,
+        ResourceActionsEnum.patch_detail,
+        ResourceActionsEnum.delete,
+        ResourceActionsEnum.list_users,
     },
-    SpecificResourceRightsEnum.edit: {
-        SpecificResourceActionsEnum.get,
-        SpecificResourceActionsEnum.download,
-        SpecificResourceActionsEnum.patch,
-    },
-    SpecificResourceRightsEnum.own: {
-        SpecificResourceActionsEnum.get,
-        SpecificResourceActionsEnum.download,
-        SpecificResourceActionsEnum.patch,
-        SpecificResourceActionsEnum.share,
-        SpecificResourceActionsEnum.unshare,
-        SpecificResourceActionsEnum.delete,
+    ResourceRightsEnum.admin: {
+        ResourceActionsEnum.get_detail,
+        # admin cannot change people's password or name..
+        # ResourceActionsEnum.patch_detail,
+        # admin cannot delete user
+        # ResourceActionsEnum.delete,
+        ResourceActionsEnum.list_users,
+        ResourceActionsEnum.create_user,
+        ResourceActionsEnum.ban_user,
+        ResourceActionsEnum.unban_user,
     },
 }

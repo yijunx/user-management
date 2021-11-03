@@ -13,7 +13,10 @@ def translate_query_pagination(
     limit: int
     offset: int
     if query_pagination.size == -1:
-        # -1 means get all
+        # this means to to get all
+        # the repo layer must ask DB again and again
+        # instead of ask for a big chunk in one shot
+        # repo layer has not implemented this yet
         limit = total
         offset = 0
         current_page = 1
