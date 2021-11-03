@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 
 
 app = Flask(__name__)
-app.secret_key = conf.APP_SECRET  # for the csrf to work
+# app.secret_key = conf.APP_SECRET  # for the csrf to work
 init_logger(app=app)
 
 # CSRFProtect(app)
