@@ -19,6 +19,7 @@ from app.util.response_util import create_response
 from app.util.process_request import (
     encode_email_verification_token,
 )
+
 # from app.exceptions.item import ItemDoesNotExist, ItemNameIsAlreadyThere
 
 
@@ -26,7 +27,7 @@ bp = Blueprint("user", __name__, url_prefix="/api/users")
 logger = get_logger(__name__)
 
 
-@bp.route("/", methods=['POST'])
+@bp.route("", methods=["POST"])
 @validate()
 @authorize_user_domain(action=ResourceActionsEnum.create_user)
 def create_password_user(body: UserRegisterWithPassword, actor: User):
@@ -54,35 +55,33 @@ def create_password_user(body: UserRegisterWithPassword, actor: User):
     )
 
 
-
-
-@bp.route("/", methods=['GET'])
-@validate()
+@bp.route("", methods=["GET"])
+@validate(query=QueryPagination)
 @authorize_user_domain(action=ResourceActionsEnum.list_users)
-def list_users(query: QueryPagination, actor: User):
+def list_users(actor: User):
+    # with my own decorator.. it has to be used in this way??
+    query = request.query_params
     try:
-        users_with_paging = userService.list_users(
-            query_pagination=query
-        )
+        users_with_paging = userService.list_users(query_pagination=query)
     except Exception as e:
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
     return create_response(
         success=True,
-        status_code=201,
         response=users_with_paging,
     )
 
 
-
-@bp.route("/<user_id>", methods=['GET'])
+@bp.route("/<user_id>", methods=["GET"])
 @validate()
 @authorize_user_domain(action=ResourceActionsEnum.get_detail)
 def get_user(user_id: str, actor: User):
     try:
         user = userService.get_user_in_response(item_id=user_id)
     except UserDoesNotExist as e:
-        return create_response(success=False, message=e.message, status_code=e.status_code)
+        return create_response(
+            success=False, message=e.message, status_code=e.status_code
+        )
     except Exception as e:
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
@@ -93,15 +92,16 @@ def get_user(user_id: str, actor: User):
     )
 
 
-
-@bp.route("/<user_id>", methods=['PATCH'])
+@bp.route("/<user_id>", methods=["PATCH"])
 @validate()
 @authorize_user_domain(action=ResourceActionsEnum.patch_detail)
 def patch_user(user_id: str, body: UserPatch, actor: User):
     try:
         user = userService.update_user_detail(item_id=user_id, user_patch=body)
     except UserDoesNotExist as e:
-        return create_response(success=False, message=e.message, status_code=e.status_code)
+        return create_response(
+            success=False, message=e.message, status_code=e.status_code
+        )
     except Exception as e:
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
@@ -112,20 +112,15 @@ def patch_user(user_id: str, body: UserPatch, actor: User):
     )
 
 
-
-@bp.route("/<user_id>", methods=['DELETE'])
+@bp.route("/<user_id>", methods=["DELETE"])
 @validate()
 @authorize_user_domain(action=ResourceActionsEnum.delete)
 def delete_user(user_id: str, actor: User):
     print(f"deleting user {user_id} by {actor.name}, not implemeted yet")
-    return create_response(
-        success=False,
-        message="not implemented"
-    )
+    return create_response(success=False, message="not implemented")
 
 
-
-@bp.route("/<user_id>/ban", methods=['POST'])
+@bp.route("/<user_id>/ban", methods=["POST"])
 @validate()
 @authorize_user_domain(action=ResourceActionsEnum.ban_user)
 def ban_user(user_id: str, actor: User):
@@ -133,13 +128,9 @@ def ban_user(user_id: str, actor: User):
     pass
 
 
-
-@bp.route("/<user_id>/unban", methods=['POST'])
+@bp.route("/<user_id>/unban", methods=["POST"])
 @validate()
 @authorize_user_domain(action=ResourceActionsEnum.unban_user)
 def unban_user(user_id: str, actor: User):
     print(f"unban user {user_id} by {actor.name}, not implemeted yet")
     pass
-
-
-

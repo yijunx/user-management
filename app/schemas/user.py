@@ -54,13 +54,15 @@ class UserInDecodedToken(UserInResponse):
 
 
 class UserPatch(BaseModel):
-    '''use for users to update name and else'''
+    """use for users to update name and else"""
+
     name: Optional[str]
     # password: Optional[str]
 
 
 class UserPasswordPatch(BaseModel):
-    '''use for user update passeword'''
+    """use for user update passeword"""
+
     password: str
 
 

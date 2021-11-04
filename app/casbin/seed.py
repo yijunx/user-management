@@ -5,12 +5,12 @@ from app.db.database import get_db
 import app.repo.user as userRepo
 import os
 
-    
+
 def seed_or_get_admin_user() -> str:
 
-    name=os.getenv("ADMIN_USER_NAME")
-    email=os.getenv("ADMIN_USER_EMAIL")
-    password=os.getenv("ADMIN_USER_PASSWORD")
+    name = os.getenv("ADMIN_USER_NAME")
+    email = os.getenv("ADMIN_USER_EMAIL")
+    password = os.getenv("ADMIN_USER_PASSWORD")
 
     salt, hashed_password = create_hashed_password(password=password)
     user_create = UserCreate(

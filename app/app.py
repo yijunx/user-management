@@ -9,6 +9,7 @@ from flask_wtf import CSRFProtect
 
 # blueprints
 from app.blueprints.core import bp as coreBp
+from app.blueprints.user import bp as userBp
 
 # from app.blueprints.user import bp as userBp
 # from app.blueprints.internal import bp as internalBp
@@ -45,5 +46,5 @@ app.json_encoder = CustomJSONEncoder
 
 
 app.register_blueprint(coreBp)
-# app.register_blueprint(userBp)
+app.register_blueprint(userBp)
 # app.register_blueprint(internalBp)

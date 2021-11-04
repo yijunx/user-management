@@ -40,23 +40,27 @@ def authorize(action: ResourceActionsEnum = None):
 def authorize_user_domain(action: ResourceActionsEnum = None):
     def decorator(func):
         def wrapper_enforcer(*args, **kwargs):
-            user = get_user_info_from_request(request=request)
+            actor = get_user_info_from_request(request=request)
+            actor_id = actor.id
             try:
                 user_id: str = kwargs["user_id"]
                 resource_id = get_resource_id_from_user_id(user_id)
             except:
                 resource_id = conf.RESOURCE_NAME_USER
 
-            if casbin_enforcer.enforce(user_id, resource_id, action):
+            if casbin_enforcer.enforce(actor_id, resource_id, action):
                 print("casbin allows it..!")
                 # here i use actor because this is the initiator of the action
-                return func(*args, **kwargs, actor=user)
+                return func(*args, **kwargs, actor=actor)
             else:
                 return create_response(
                     status_code=403,
-                    message=f"User {user.id} has no right to {action} resource {resource_id}",
+                    message=f"User {actor.id} has no right to {action} resource {resource_id}",
                     success=False,
                 )
-        return wrapper_enforcer
-    return decorator
 
+        # this is to prevent some view point!!
+        wrapper_enforcer.__name__ = func.__name__
+        return wrapper_enforcer
+
+    return decorator
