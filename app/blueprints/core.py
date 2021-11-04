@@ -12,7 +12,7 @@ from app.schemas.user import (
 )
 from app.util.email_handler import send_email_verification
 from app.util.response_util import create_response
-import app.service.core as coreService
+import app.service.user as userService
 from app.util.app_logging import get_logger
 from app.util.process_request import (
     decode_token,
@@ -51,7 +51,7 @@ def password_user_register(body: UserRegisterWithPassword):
     and the user can login
     """
     try:
-        user = coreService.create_user_with_password(
+        user = userService.create_user_with_password(
             name=body.name, email=body.email, password=body.password
         )
         # now send the email
@@ -79,11 +79,11 @@ def verify_email(query: UserEmailVerificationParam):
     user_in_email_verification = UserInEmailVerification(
         **decode_token(token=query.token)
     )
-    user = coreService.get_user(item_id=user_in_email_verification.id)
+    user = userService.get_user(item_id=user_in_email_verification.id)
     if user.email_verified:
         return create_response(success=True)
     if user.salt == user_in_email_verification.salt:
-        coreService.update_user_email_verified(item_id=user.id)
+        userService.update_user_email_verified(item_id=user.id)
         return create_response(success=True)
     return create_response(success=False, status_code=400)
 
@@ -92,7 +92,7 @@ def verify_email(query: UserEmailVerificationParam):
 @validate()
 def login_with_password(body: UserLoginWithPassword):
     # user_login = request.body_params
-    user = coreService.get_user_with_email(email=body.email)
+    user = userService.get_user_with_email(email=body.email)
     if user is None:
         return create_response(
             success=False, status_code=401, message="Email or Password is incorrect"
@@ -116,7 +116,7 @@ def login_with_password(body: UserLoginWithPassword):
     # user without verified email cannot do anything
     # can just login, and request verification email again
 
-    coreService.update_user_login_time(item_id=user.id)
+    userService.update_user_login_time(item_id=user.id)
     user_in_reponse = UserInResponse(**user.dict())
     access_token = encode_access_token(user_in_reponse=user_in_reponse)
     return create_response(
@@ -134,11 +134,11 @@ def login_with_google():
 
     print("login with google request is here..")
     google_user: GoogleUser = get_google_user_from_request(request=request)
-    user = coreService.get_user_with_email(email=google_user.email)
+    user = userService.get_user_with_email(email=google_user.email)
     if user is None:
         try:
             print("try creating user...")
-            user = coreService.create_user_with_google_login(
+            user = userService.create_user_with_google_login(
                 name=google_user.name, email=google_user.email
             )
         except UserEmailAlreadyExist as e:
@@ -158,7 +158,7 @@ def login_with_google():
             )
 
     # now user is good...
-    coreService.update_user_login_time(item_id=user.id)
+    userService.update_user_login_time(item_id=user.id)
     user_in_reponse = UserInResponse(**user.dict())
     access_token = encode_access_token(user_in_reponse=user_in_reponse)
     return create_response(
@@ -170,7 +170,7 @@ def login_with_google():
 @bp.route("/logout", methods=["POST"])
 def logout():
     user_in_token = get_user_info_from_request(request=request)
-    coreService.update_user_logout_time(item_id=user_in_token.id)
+    userService.update_user_logout_time(item_id=user_in_token.id)
     return create_response(message="you are logged out", cookies_to_delete=["token"])
 
 
@@ -180,7 +180,7 @@ def authenticate():
     print(request.headers)
     user_in_token = get_user_info_from_request(request=request)
     try:
-        user = coreService.get_user(item_id=user_in_token.id)
+        user = userService.get_user(item_id=user_in_token.id)
         if user.last_logout is None or user_in_token.iat > user.last_logout:
             return create_response(status=200, message="welcome")
         else:

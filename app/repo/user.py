@@ -3,7 +3,7 @@ from sqlalchemy.sql.expression import and_, or_
 from app.schemas.pagination import QueryPagination, ResponsePagination
 from app.db.models import models
 from sqlalchemy.orm import Session
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserPatch
 from uuid import uuid4
 from app.repo.util import translate_query_pagination
 from app.exceptions.user import UserDoesNotExist, UserEmailAlreadyExist
@@ -45,6 +45,15 @@ def get(db: Session, item_id: str) -> models.User:
     db_item = db.query(models.User).filter(models.User.id == item_id).first()
     if not db_item:
         raise UserDoesNotExist(user_id=item_id)
+    return db_item
+
+
+def patch(db: Session, item_id: str, item_patch: UserPatch) -> models.User:
+    db_item = db.query(models.User).filter(models.User.id == item_id).first()
+    if not db_item:
+        raise UserDoesNotExist(user_id=item_id)
+    if item_patch.name is not None:
+        db_item.name = item_patch.name
     return db_item
 
 
