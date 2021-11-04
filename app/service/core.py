@@ -2,7 +2,8 @@ from datetime import datetime, timezone
 from app.casbin.resource_id_converter import get_resource_id_from_user_id
 from app.casbin.role_definition import ResourceRightsEnum
 from app.db.database import get_db
-from app.schemas.user import LoginMethodEnum, UserCreate, User
+from app.schemas.pagination import QueryPagination
+from app.schemas.user import LoginMethodEnum, UserCreate, User, UserInResponse, UserWithPaging
 from app.util.password import create_hashed_password
 import app.repo.user as userRepo
 from typing import Union
@@ -46,6 +47,13 @@ def create_user_with_password(name: str, email: str, password) -> User:
             ResourceRightsEnum.own,
         )
     return user
+
+
+def list_users(query_pagination: QueryPagination) -> UserWithPaging:
+    with get_db() as db:
+        db_items, paging = userRepo.get_all(db=db, query_pagination=query_pagination)
+        items = [UserInResponse.from_orm(x) for x in db_items]
+    return UserWithPaging(data=items, paging=paging)
 
 
 def get_user(item_id: str) -> User:
