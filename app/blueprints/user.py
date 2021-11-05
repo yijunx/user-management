@@ -28,9 +28,10 @@ logger = get_logger(__name__)
 
 
 @bp.route("", methods=["POST"])
-@validate()
 @authorize_user_domain(action=ResourceActionsEnum.create_user)
-def create_password_user(body: UserRegisterWithPassword, actor: User):
+@validate()
+def create_password_user(body: UserRegisterWithPassword):
+    actor: User = request.environ["actor"] 
     print(f"creating {body.name} by {actor.name} ")
     try:
         user = userService.create_user_with_password(
@@ -56,11 +57,10 @@ def create_password_user(body: UserRegisterWithPassword, actor: User):
 
 
 @bp.route("", methods=["GET"])
-@validate(query=QueryPagination)
 @authorize_user_domain(action=ResourceActionsEnum.list_users)
-def list_users(actor: User):
-    # with my own decorator.. it has to be used in this way??
-    query = request.query_params
+@validate()
+def list_users(query: QueryPagination):
+    actor: User = request.environ["actor"] 
     try:
         users_with_paging = userService.list_users(query_pagination=query)
     except Exception as e:
@@ -73,9 +73,10 @@ def list_users(actor: User):
 
 
 @bp.route("/<user_id>", methods=["GET"])
-@validate()
 @authorize_user_domain(action=ResourceActionsEnum.get_detail)
-def get_user(user_id: str, actor: User):
+@validate()
+def get_user(user_id: str):
+    actor: User = request.environ["actor"] 
     try:
         user = userService.get_user_in_response(item_id=user_id)
     except UserDoesNotExist as e:
@@ -93,9 +94,10 @@ def get_user(user_id: str, actor: User):
 
 
 @bp.route("/<user_id>", methods=["PATCH"])
-@validate()
 @authorize_user_domain(action=ResourceActionsEnum.patch_detail)
-def patch_user(user_id: str, body: UserPatch, actor: User):
+@validate()
+def patch_user(user_id: str, body: UserPatch):
+    actor: User = request.environ["actor"] 
     try:
         user = userService.update_user_detail(item_id=user_id, user_patch=body)
     except UserDoesNotExist as e:
@@ -113,24 +115,27 @@ def patch_user(user_id: str, body: UserPatch, actor: User):
 
 
 @bp.route("/<user_id>", methods=["DELETE"])
-@validate()
 @authorize_user_domain(action=ResourceActionsEnum.delete)
-def delete_user(user_id: str, actor: User):
+@validate()
+def delete_user(user_id: str):
+    actor: User = request.environ["actor"] 
     print(f"deleting user {user_id} by {actor.name}, not implemeted yet")
     return create_response(success=False, message="not implemented")
 
 
 @bp.route("/<user_id>/ban", methods=["POST"])
-@validate()
 @authorize_user_domain(action=ResourceActionsEnum.ban_user)
-def ban_user(user_id: str, actor: User):
+@validate()
+def ban_user(user_id: str):
+    actor: User = request.environ["actor"] 
     print(f"ban user {user_id} by {actor.name}, not implemeted yet")
     pass
 
 
 @bp.route("/<user_id>/unban", methods=["POST"])
-@validate()
 @authorize_user_domain(action=ResourceActionsEnum.unban_user)
-def unban_user(user_id: str, actor: User):
+@validate()
+def unban_user(user_id: str):
+    actor: User = request.environ["actor"] 
     print(f"unban user {user_id} by {actor.name}, not implemeted yet")
     pass

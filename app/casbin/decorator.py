@@ -51,7 +51,8 @@ def authorize_user_domain(action: ResourceActionsEnum = None):
             if casbin_enforcer.enforce(actor_id, resource_id, action):
                 print("casbin allows it..!")
                 # here i use actor because this is the initiator of the action
-                return func(*args, **kwargs, actor=actor)
+                request.environ["actor"] = actor
+                return func(*args, **kwargs)
             else:
                 return create_response(
                     status_code=403,
