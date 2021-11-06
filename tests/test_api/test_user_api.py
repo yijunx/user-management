@@ -52,6 +52,15 @@ def test_get_user_from_user(client_from_user: FlaskClient, user_email: str):
     assert user_in_response.name == user.name
 
 
+def test_patch_user_from_user(client_from_user: FlaskClient, user_email: str):
+    user = get_user_with_email(email=user_email)
+    new_name = "new_name"
+    r = client_from_user.patch(f"/api/users/{user.id}", json={"name": new_name})
+    user_in_response = UserInResponse(**r.get_json()["response"])
+    assert r.status_code == 200
+    assert user_in_response.name == new_name
+
+
 def test_delete_user_from_user(client_from_user: FlaskClient, user_email: str):
     user = get_user_with_email(email=user_email)
     r = client_from_user.delete(f"/api/users/{user.id}")

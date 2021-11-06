@@ -108,8 +108,8 @@ def update_user_logout_time(item_id: str) -> None:
 def update_user_detail(item_id: str, user_patch: UserPatch) -> UserInResponse:
     with get_db() as db:
         db_item = userRepo.patch(db=db, item_id=item_id, item_patch=user_patch)
-        item = UserInResponse.from_orm(db_item)
-    return item
+        item = User.from_orm(db_item)
+    return UserInResponse(**item.dict())
 
 
 def unregister_user(item_id: str) -> None:

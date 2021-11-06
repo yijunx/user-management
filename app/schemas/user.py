@@ -54,7 +54,7 @@ class UserInDecodedToken(UserInResponse):
 
 
 class UserPatch(BaseModel):
-    """use for users to update name and else"""
+    """use for users to update name and else, those not sentive stuff"""
 
     name: Optional[str]
     # password: Optional[str]
