@@ -6,10 +6,12 @@ from app.schemas.user import (
     UserInResponse,
 )
 import app.repo.user as userRepo
+import app.repo.casbin as casbinRepo
 from tests import fixture
 from flask.testing import FlaskClient
 from sqlalchemy.orm import Session
 from app.util.process_request import encode_email_verification_token
+from app.casbin.resource_id_converter import get_resource_id_from_user_id
 
 
 GOOGLE_LOGIN_USER_ID = ""
@@ -105,3 +107,9 @@ def test_login_user_with_password(
 def test_delete_item(db: Session):
     userRepo.delete(db=db, item_id=GOOGLE_LOGIN_USER_ID)
     userRepo.delete(db=db, item_id=PASSWORD_LOGIN_USER_ID)
+    casbinRepo.delete_policies_by_resource_id(
+        db=db, resource_id=get_resource_id_from_user_id(item_id=GOOGLE_LOGIN_USER_ID)
+    )
+    casbinRepo.delete_policies_by_resource_id(
+        db=db, resource_id=get_resource_id_from_user_id(item_id=PASSWORD_LOGIN_USER_ID)
+    )
