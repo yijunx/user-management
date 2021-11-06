@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from app.casbin.resource_id_converter import get_resource_id_from_user_id
-from app.casbin.role_definition import ResourceRightsEnum
+from app.casbin.role_definition import ResourceActionsEnum, ResourceRightsEnum
 from app.db.database import get_db
 from app.schemas.pagination import QueryPagination
 from app.schemas.user import (
@@ -113,6 +113,8 @@ def update_user_detail(item_id: str, user_patch: UserPatch) -> UserInResponse:
 
 
 def unregister_user(item_id: str) -> None:
+
+    # remember to update the casbin rules
     pass
 
 
@@ -120,3 +122,4 @@ def delete_user(item_id: str) -> None:
     """only used in test"""
     with get_db() as db:
         userRepo.delete(db=db, item_id=item_id)
+        casbin_enforcer.delete_permission(item_id, get_resource_id_from_user_id(item_id), ResourceRightsEnum.own)

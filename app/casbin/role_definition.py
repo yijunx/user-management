@@ -23,7 +23,7 @@ class ResourceActionsEnum(str, Enum):
     # used when user update name or password or other profile
     patch_detail = "patch_detail"
     # used when user wants to delete himself...
-    delete = "delete"
+    unregister = "unregister"
     # used when user wants to list users and search
     list_users = "list_users"
     # used when admin wants to create a user
@@ -31,6 +31,8 @@ class ResourceActionsEnum(str, Enum):
     # used when admin wants to (un)ban a user
     ban_user = "ban_user"
     unban_user = "unban_user"
+    delete_user = "delete_user"
+
 
 
 # this is dynamic
@@ -40,18 +42,19 @@ resource_right_action_mapping: dict = {
     ResourceRightsEnum.own: {
         ResourceActionsEnum.get_detail,
         ResourceActionsEnum.patch_detail,
-        ResourceActionsEnum.delete,
+        ResourceActionsEnum.unregister,
         ResourceActionsEnum.list_users,
     },
     ResourceRightsEnum.admin: {
         ResourceActionsEnum.get_detail,
         # admin cannot change people's password or name..
         # ResourceActionsEnum.patch_detail,
-        # admin cannot delete user
-        # ResourceActionsEnum.delete,
+        # admin cannot unregister user
+        # ResourceActionsEnum.unregister,
         ResourceActionsEnum.list_users,
         ResourceActionsEnum.create_user,
         ResourceActionsEnum.ban_user,
         ResourceActionsEnum.unban_user,
+        ResourceActionsEnum.delete_user
     },
 }
