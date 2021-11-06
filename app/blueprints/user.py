@@ -31,7 +31,7 @@ logger = get_logger(__name__)
 @authorize_user_domain(action=ResourceActionsEnum.create_user)
 @validate()
 def create_password_user(body: UserRegisterWithPassword):
-    actor: User = request.environ["actor"] 
+    actor: User = request.environ["actor"]
     print(f"creating {body.name} by {actor.name} ")
     try:
         user = userService.create_user_with_password(
@@ -60,7 +60,7 @@ def create_password_user(body: UserRegisterWithPassword):
 @authorize_user_domain(action=ResourceActionsEnum.list_users)
 @validate()
 def list_users(query: QueryPagination):
-    actor: User = request.environ["actor"] 
+    actor: User = request.environ["actor"]
     try:
         users_with_paging = userService.list_users(query_pagination=query)
     except Exception as e:
@@ -76,7 +76,7 @@ def list_users(query: QueryPagination):
 @authorize_user_domain(action=ResourceActionsEnum.get_detail)
 @validate()
 def get_user(user_id: str):
-    actor: User = request.environ["actor"] 
+    actor: User = request.environ["actor"]
     try:
         user = userService.get_user_in_response(item_id=user_id)
     except UserDoesNotExist as e:
@@ -97,7 +97,7 @@ def get_user(user_id: str):
 @authorize_user_domain(action=ResourceActionsEnum.patch_detail)
 @validate()
 def patch_user(user_id: str, body: UserPatch):
-    actor: User = request.environ["actor"] 
+    actor: User = request.environ["actor"]
     try:
         user = userService.update_user_detail(item_id=user_id, user_patch=body)
     except UserDoesNotExist as e:
@@ -115,19 +115,27 @@ def patch_user(user_id: str, body: UserPatch):
 
 
 @bp.route("/<user_id>", methods=["DELETE"])
-@authorize_user_domain(action=ResourceActionsEnum.delete)
+@authorize_user_domain(action=ResourceActionsEnum.delete_user)
 @validate()
 def delete_user(user_id: str):
-    actor: User = request.environ["actor"] 
-    print(f"deleting user {user_id} by {actor.name}, not implemeted yet")
-    return create_response(success=False, message="not implemented")
+    _: User = request.environ["actor"]
+    try:
+        userService.delete_user(item_id=user_id)
+    except UserDoesNotExist as e:
+        return create_response(
+            success=False, message=e.message, status_code=e.status_code
+        )
+    except Exception as e:
+        logger.debug(e, exc_info=True)
+        return create_response(success=False, message=str(e), status_code=500)
+    return create_response(success=False, message="user deleted..")
 
 
 @bp.route("/<user_id>/ban", methods=["POST"])
 @authorize_user_domain(action=ResourceActionsEnum.ban_user)
 @validate()
 def ban_user(user_id: str):
-    actor: User = request.environ["actor"] 
+    actor: User = request.environ["actor"]
     print(f"ban user {user_id} by {actor.name}, not implemeted yet")
     pass
 
@@ -136,6 +144,6 @@ def ban_user(user_id: str):
 @authorize_user_domain(action=ResourceActionsEnum.unban_user)
 @validate()
 def unban_user(user_id: str):
-    actor: User = request.environ["actor"] 
+    actor: User = request.environ["actor"]
     print(f"unban user {user_id} by {actor.name}, not implemeted yet")
     pass

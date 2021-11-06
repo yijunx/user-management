@@ -34,7 +34,6 @@ class ResourceActionsEnum(str, Enum):
     delete_user = "delete_user"
 
 
-
 # this is dynamic
 # this is make sure that, own covers edit, edit covers view
 # this also supports other relations, very customization
@@ -55,6 +54,6 @@ resource_right_action_mapping: dict = {
         ResourceActionsEnum.create_user,
         ResourceActionsEnum.ban_user,
         ResourceActionsEnum.unban_user,
-        ResourceActionsEnum.delete_user
+        ResourceActionsEnum.delete_user,
     },
 }
