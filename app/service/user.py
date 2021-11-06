@@ -13,6 +13,7 @@ from app.schemas.user import (
 )
 from app.util.password import create_hashed_password
 import app.repo.user as userRepo
+import app.repo.casbin as casbinRepo
 from typing import Union
 from app.casbin.enforcer import casbin_enforcer
 
@@ -24,7 +25,13 @@ def create_user_with_google_login(name: str, email: str) -> User:
     with get_db() as db:
         db_item = userRepo.create(db=db, item_create=user_create)
         user = User.from_orm(db_item)
-        # this user herself is the owner of herself
+        # casbinRepo.create_policy(
+        #     db=db,
+        #     user_id=user.id,
+        #     resource_id=get_resource_id_from_user_id(user.id),
+        #     resource_right=ResourceRightsEnum.own,
+        # )
+
         casbin_enforcer.add_policy(
             user.id,
             get_resource_id_from_user_id(user.id),
@@ -123,6 +130,10 @@ def delete_user(item_id: str) -> None:
     """well this is really delete, only admin can do this"""
     with get_db() as db:
         userRepo.delete(db=db, item_id=item_id)
+        # the below step should be down via db...
         casbin_enforcer.remove_policy(
             item_id, get_resource_id_from_user_id(item_id), ResourceRightsEnum.own
         )
+        # casbinRepo.delete_policies_by_resource_id(
+        #     db=db, resource_id=get_resource_id_from_user_id(item_id)
+        # )

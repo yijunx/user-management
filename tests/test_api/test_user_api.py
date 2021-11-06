@@ -61,10 +61,10 @@ def test_patch_user_from_user(client_from_user: FlaskClient, user_email: str):
     assert user_in_response.name == new_name
 
 
-def test_delete_user_from_user(client_from_user: FlaskClient, user_email: str):
-    user = get_user_with_email(email=user_email)
-    r = client_from_user.delete(f"/api/users/{user.id}")
-    assert r.status_code == 403
+# def test_delete_user_from_user(client_from_user: FlaskClient, user_email: str):
+#     user = get_user_with_email(email=user_email)
+#     r = client_from_user.delete(f"/api/users/{user.id}")
+#     assert r.status_code == 403
 
 
 def test_delete_user_from_admin(client_from_admin: FlaskClient, user_email: str):

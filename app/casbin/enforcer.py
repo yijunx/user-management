@@ -45,16 +45,13 @@ def create_casbin_enforcer():
     casbin_enforcer.add_function("objects_mapping", objects_mapping)
     # add admin role, only admin can create
     # well we cannot add policy this way because there are additional columns
+
+    # well need to group all below stuff into seed...
     casbin_enforcer.add_policy(
         "admin-role-id", conf.RESOURCE_NAME_USER, ResourceRightsEnum.admin
     )
     admin_user_id = seed_or_get_admin_user()
     casbin_enforcer.add_grouping_policy(admin_user_id, "admin-role-id")
-
-    # add a default admin user!!!
-
-    # think about the casbin rules
-
     return casbin_enforcer
 
 
