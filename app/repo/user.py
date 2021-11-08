@@ -52,7 +52,7 @@ def patch(db: Session, item_id: str, item_patch: UserPatch) -> models.User:
     db_item = db.query(models.User).filter(models.User.id == item_id).first()
     if not db_item:
         raise UserDoesNotExist(user_id=item_id)
-    if item_patch.name is not None:
+    if item_patch.name:  # also name cannot be empty...
         db_item.name = item_patch.name
     return db_item
 

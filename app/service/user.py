@@ -119,6 +119,10 @@ def update_user_detail(item_id: str, user_patch: UserPatch) -> UserInResponse:
     return UserInResponse(**item.dict())
 
 
+def update_user_password() -> None:
+    return
+
+
 def unregister_user(item_id: str) -> None:
     """this is from user, not admin.."""
 
