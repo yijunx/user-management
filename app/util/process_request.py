@@ -5,7 +5,7 @@ from app.schemas.user import (
     GoogleUser,
     UserInDecodedToken,
     UserInEmailVerification,
-    UserInResponse,
+    User,
 )
 from flask import Request, abort
 from datetime import datetime, timedelta, timezone
@@ -51,13 +51,13 @@ def encode_email_verification_token(
     return encoded
 
 
-def encode_access_token(user_in_reponse: UserInResponse) -> str:
+def encode_access_token(user: User) -> str:
     additional_token_payload = {
         "exp": datetime.now(timezone.utc) + timedelta(seconds=60 * 60 * 8),
         "iat": datetime.now(timezone.utc),
         "iss": conf.DOMAIN_NAME,
     }
-    payload = user_in_reponse.dict()
+    payload = user.dict()
     payload.update(additional_token_payload)
     encoded = jwt.encode(
         payload=payload,

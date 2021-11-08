@@ -115,13 +115,11 @@ def login_with_password(body: UserLoginWithPassword):
     # here is some notes about if email is verified.
     # user without verified email cannot do anything
     # can just login, and request verification email again
-
     userService.update_user_login_time(item_id=user.id)
     user_in_reponse = UserInResponse(**user.dict())
-    access_token = encode_access_token(user_in_reponse=user_in_reponse)
     return create_response(
         response=user_in_reponse,
-        cookies={"token": access_token},
+        cookies={"token": encode_access_token(user=user)},
     )
 
 
@@ -160,10 +158,9 @@ def login_with_google():
     # now user is good...
     userService.update_user_login_time(item_id=user.id)
     user_in_reponse = UserInResponse(**user.dict())
-    access_token = encode_access_token(user_in_reponse=user_in_reponse)
     return create_response(
         response=user_in_reponse,
-        cookies={"token": access_token},
+        cookies={"token": encode_access_token(user=user)},
     )
 
 
