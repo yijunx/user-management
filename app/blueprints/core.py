@@ -176,11 +176,21 @@ def logout():
 
 @bp.route("/authenticate", methods=["POST"])
 def authenticate():
-    # so here we need to check user.last_logout vs token's iat..
+    """this is for all other microservices, must go through here to validate token
+    with the public key
+    """
     print(request.headers)
     user_in_token = get_user_info_from_request(request=request)
     try:
         user = userService.get_user(item_id=user_in_token.id)
+
+        # check if the user's email is verified
+        if user.login_method == LoginMethodEnum.password:
+            if not user.email_verified:
+                return create_response(
+                    status=400,
+                    message="you must verify your email before doing any contribution",
+                )
         if user.last_logout is None or user_in_token.iat > user.last_logout:
             return create_response(status=200, message="welcome")
         else:
