@@ -18,6 +18,8 @@ def authorize(action: ResourceActionsEnum = None):
     the request path. (it does not nessisarily needs to take user/item id from request)
 
     when use, either use with action is not None, or admin_required is True
+
+    THIS DECORATOR WORKS ON THE SERVICE LAYER
     """
 
     def decorator(func):
@@ -38,6 +40,7 @@ def authorize(action: ResourceActionsEnum = None):
 
 
 def authorize_user_domain(action: ResourceActionsEnum = None):
+    """THIS DECORATOR WORKS ON THE API LAYER"""
     def decorator(func):
         def wrapper_enforcer(*args, **kwargs):
             actor = get_user_info_from_request(request=request)
