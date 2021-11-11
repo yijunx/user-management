@@ -58,6 +58,9 @@ def encode_access_token(user: User) -> str:
         "iss": conf.DOMAIN_NAME,
     }
     payload = user.dict()
+    for k, v in payload.items():
+        if isinstance(v, datetime):
+            payload[k] = v.isoformat()
     payload.update(additional_token_payload)
     encoded = jwt.encode(
         payload=payload,

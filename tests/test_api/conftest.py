@@ -49,8 +49,7 @@ def user_login_with_password() -> UserLoginWithPassword:
 @pytest.fixture
 def client_from_admin() -> FlaskClient:
     user = userService.get_user_with_email(email=os.getenv("ADMIN_USER_EMAIL"))
-    user_in_response = UserInResponse(**user.dict())
-    token = encode_access_token(user_in_reponse=user_in_response)
+    token = encode_access_token(user=user)
     with app.test_client() as c:
         c.set_cookie("localhost", "token", token)
         yield c
@@ -69,8 +68,8 @@ def client_from_user(user_email: str) -> FlaskClient:
         )
     except UserEmailAlreadyExist:
         user = userService.get_user_with_email(email=user_email)
-    user_in_response = UserInResponse(**user.dict())
-    token = encode_access_token(user_in_reponse=user_in_response)
+    # user_in_response = UserInResponse(**user.dict())
+    token = encode_access_token(user=user)
     with app.test_client() as c:
         c.set_cookie("localhost", "token", token)
         yield c
