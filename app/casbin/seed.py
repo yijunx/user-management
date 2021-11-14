@@ -11,6 +11,7 @@ def seed_or_get_admin_user() -> str:
     name = os.getenv("ADMIN_USER_NAME")
     email = os.getenv("ADMIN_USER_EMAIL")
     password = os.getenv("ADMIN_USER_PASSWORD")
+    id = os.getenv("ADMIN_USER_ID")
 
     salt, hashed_password = create_hashed_password(password=password)
     user_create = UserCreate(
@@ -25,6 +26,6 @@ def seed_or_get_admin_user() -> str:
     with get_db() as db:
         db_item = userRepo.get_by_email(db=db, email=email)
         if db_item is None:
-            db_item = userRepo.create(db=db, item_create=user_create)
+            db_item = userRepo.create(db=db, item_create=user_create, item_id=id)
         user = User.from_orm(db_item)
     return user.id

@@ -10,9 +10,9 @@ from app.exceptions.user import UserDoesNotExist, UserEmailAlreadyExist
 from sqlalchemy.exc import IntegrityError
 
 
-def create(db: Session, item_create: UserCreate) -> models.User:
+def create(db: Session, item_create: UserCreate, item_id: str = None) -> models.User:
     db_item = models.User(
-        id=str(uuid4()),  # [let db create the id for us]
+        id=item_id or str(uuid4()),  # [let db create the id for us]
         name=item_create.name,
         created_at=item_create.created_at,
         email=item_create.email,
