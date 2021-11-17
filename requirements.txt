@@ -17,6 +17,7 @@ flask-request-id-header
 casbin
 casbin_sqlalchemy_adapter
 sendgrid
+boto3
 
 
 
