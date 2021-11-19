@@ -147,3 +147,31 @@ def unban_user(user_id: str):
     actor: User = request.environ["actor"]
     print(f"unban user {user_id} by {actor.name}, not implemeted yet")
     pass
+
+
+@bp.route("/<user_id>/roles", methods=["GET"])
+@authorize_user_domain(action=ResourceActionsEnum.unban_user)
+@validate()
+def get_user_roles(user_id: str):
+    actor: User = request.environ["actor"]
+    print(f"unban user {user_id} by {actor.name}, not implemeted yet")
+    pass
+
+
+@bp.route("/<user_id>/roles", methods=["POST"])
+@authorize_user_domain(action=ResourceActionsEnum.unban_user)
+@validate()
+def add_user_roles(user_id: str):
+    actor: User = request.environ["actor"]
+    print(f"unban user {user_id} by {actor.name}, not implemeted yet")
+    pass
+
+
+@bp.route("/<user_id>/roles/<role_name>", methods=["DELETE"])
+@authorize_user_domain(action=ResourceActionsEnum.unban_user)
+@validate()
+def remove_user_roles(user_id: str):
+    actor: User = request.environ["actor"]
+    print(f"unban user {user_id} by {actor.name}, not implemeted yet")
+    pass
+

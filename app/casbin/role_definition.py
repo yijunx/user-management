@@ -1,6 +1,12 @@
 from enum import Enum
 
 
+class RoleNameEnum(str, Enum):
+    # well we could have more admin types in the future
+    #
+    WORD_MANAGEMENT_ADMIN = "word_management_admin"
+
+
 class PolicyTypeEnum(str, Enum):
     """p for policy, g for grouping"""
 
@@ -32,6 +38,7 @@ class ResourceActionsEnum(str, Enum):
     ban_user = "ban_user"
     unban_user = "unban_user"
     delete_user = "delete_user"
+    manage_role_for_user = "manage_role_for_user"
 
 
 # this is dynamic
@@ -55,5 +62,8 @@ resource_right_action_mapping: dict = {
         ResourceActionsEnum.ban_user,
         ResourceActionsEnum.unban_user,
         ResourceActionsEnum.delete_user,
+        ResourceActionsEnum.manage_role_for_user
     },
 }
+
+
