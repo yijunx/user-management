@@ -62,8 +62,6 @@ resource_right_action_mapping: dict = {
         ResourceActionsEnum.ban_user,
         ResourceActionsEnum.unban_user,
         ResourceActionsEnum.delete_user,
-        ResourceActionsEnum.manage_role_for_user
+        ResourceActionsEnum.manage_role_for_user,
     },
 }
-
-

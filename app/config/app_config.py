@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     RESOURCE_NAME_USER: str = "users/"
     OTHER_SERVICES_URL: str = "not set up yet"
 
+    CELERY_SERVICE_NAME: str
+    CELERY_BROKER: str
+    CELERY_QUEUE: str
+
 
 class ProdConfig(Settings):
     pass

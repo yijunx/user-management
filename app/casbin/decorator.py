@@ -41,6 +41,7 @@ def authorize(action: ResourceActionsEnum = None):
 
 def authorize_user_domain(action: ResourceActionsEnum = None):
     """THIS DECORATOR WORKS ON THE API LAYER"""
+
     def decorator(func):
         def wrapper_enforcer(*args, **kwargs):
             actor = get_user_info_from_request(request=request)

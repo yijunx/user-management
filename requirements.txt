@@ -18,6 +18,7 @@ casbin
 casbin_sqlalchemy_adapter
 sendgrid
 boto3
+celery
 
 
 

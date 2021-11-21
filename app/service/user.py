@@ -1,21 +1,24 @@
 from datetime import datetime, timezone
 from app.casbin.resource_id_converter import get_resource_id_from_user_id
-from app.casbin.role_definition import ResourceActionsEnum, ResourceRightsEnum
+from app.casbin.role_definition import ResourceRightsEnum
 from app.db.database import get_db
 from app.schemas.pagination import QueryPagination
 from app.schemas.user import (
     LoginMethodEnum,
     UserCreate,
     User,
+    UserInEmailVerification,
     UserInResponse,
     UserPatch,
     UserWithPaging,
 )
 from app.util.password import create_hashed_password
 import app.repo.user as userRepo
-import app.repo.casbin as casbinRepo
 from typing import Union
 from app.casbin.enforcer import casbin_enforcer
+from app.util.async_worker import celery, CeleryTaskEnum
+from app.util.process_request import encode_email_verification_token
+from app.config.app_config import conf
 
 
 def create_user_with_google_login(name: str, email: str) -> User:
@@ -60,6 +63,15 @@ def create_user_with_password(name: str, email: str, password) -> User:
             get_resource_id_from_user_id(user.id),
             ResourceRightsEnum.own,
         )
+        token = encode_email_verification_token(
+            user_in_email_verification=UserInEmailVerification(**user.dict())
+        )
+        celery.send_task(
+            name=f"{conf.CELERY_SERVICE_NAME}.{CeleryTaskEnum.email_confirmation}",
+            kwargs={"token": token, "user_name": user.name, "user_email": user.email},
+            queue=conf.CELERY_QUEUE,
+        )
+
     return user
 
 

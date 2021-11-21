@@ -47,9 +47,9 @@ def test_login_without_user_creation_with_google(
     assert user_in_response.name == fixture.fake_google_user().name
 
 
-@patch("app.blueprints.core.send_email_verification")
+@patch("app.service.user.celery.send_task")
 def test_register_user_with_password(
-    mock_send_email_verification,
+    mock_send_task,
     client: FlaskClient,
     user_register_with_password: UserRegisterWithPassword,
     db: Session,

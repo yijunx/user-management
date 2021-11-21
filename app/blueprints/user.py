@@ -4,7 +4,6 @@ from flask_pydantic import validate
 from app.casbin.role_definition import ResourceActionsEnum
 from app.schemas.pagination import QueryPagination
 from app.schemas.user import (
-    UserInEmailVerification,
     UserInResponse,
     UserPatch,
     UserRegisterWithPassword,
@@ -14,11 +13,7 @@ import app.service.user as userService
 from app.util.app_logging import get_logger
 from app.exceptions.user import UserDoesNotExist, UserEmailAlreadyExist
 from app.casbin.decorator import authorize_user_domain
-from app.util.email_handler import send_email_verification
 from app.util.response_util import create_response
-from app.util.process_request import (
-    encode_email_verification_token,
-)
 
 # from app.exceptions.item import ItemDoesNotExist, ItemNameIsAlreadyThere
 
@@ -37,11 +32,6 @@ def create_password_user(body: UserRegisterWithPassword):
         user = userService.create_user_with_password(
             name=body.name, email=body.email, password=body.password
         )
-        # now send the email
-        token = encode_email_verification_token(
-            user_in_email_verification=UserInEmailVerification(**user.dict())
-        )
-        send_email_verification(token=token, user_email=user.email, user_name=user.name)
         user_in_response = UserInResponse(**user.dict())
     except UserEmailAlreadyExist as e:
         return create_response(success=False, message=str(e), status_code=e.status_code)
@@ -174,4 +164,3 @@ def remove_user_roles(user_id: str):
     actor: User = request.environ["actor"]
     print(f"unban user {user_id} by {actor.name}, not implemeted yet")
     pass
-

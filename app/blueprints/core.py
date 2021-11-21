@@ -10,7 +10,6 @@ from app.schemas.user import (
     UserLoginWithPassword,
     UserRegisterWithPassword,
 )
-from app.util.email_handler import send_email_verification
 from app.util.response_util import create_response
 import app.service.user as userService
 from app.util.app_logging import get_logger
@@ -19,13 +18,10 @@ from app.util.process_request import (
     get_user_info_from_request,
     get_google_user_from_request,
     encode_access_token,
-    encode_email_verification_token,
 )
 from app.exceptions.user import UserDoesNotExist, UserEmailAlreadyExist
 from flask_wtf import csrf
 from app.util.password import verify_password
-
-# from app.exceptions.item import ItemDoesNotExist, ItemNameIsAlreadyThere
 
 
 bp = Blueprint("core", __name__, url_prefix="/api")
@@ -54,11 +50,6 @@ def password_user_register(body: UserRegisterWithPassword):
         user = userService.create_user_with_password(
             name=body.name, email=body.email, password=body.password
         )
-        # now send the email
-        token = encode_email_verification_token(
-            user_in_email_verification=UserInEmailVerification(**user.dict())
-        )
-        send_email_verification(token=token, user_email=user.email, user_name=user.name)
         user_in_response = UserInResponse(**user.dict())
     except UserEmailAlreadyExist as e:
         return create_response(success=False, message=str(e), status_code=e.status_code)
