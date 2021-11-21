@@ -82,4 +82,7 @@ class UserEmailVerificationParam(BaseModel):
 
 
 class UserInEmailVerification(UserInResponse):
+    """here salt is added to make sure the no false link
+    when backend check the token in email verification
+    will check if the salt is same as user's salt"""
     salt: str
