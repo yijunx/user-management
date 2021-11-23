@@ -32,3 +32,23 @@ class UserEmailAlreadyVerified(Exception):
         self.message = f"Email already verified"
         self.status_code = 400
         super().__init__(self.message)
+
+
+class UserPasswordResetNotSame(Exception):
+    """raised when user email is not verified"""
+
+    def __init__(self) -> None:
+        self.message = f"Passwords not match"
+        self.status_code = 400
+        super().__init__(self.message)
+
+
+class UserPasswordResetSaltNotMatch(Exception):
+    """raised when user email is not verified"""
+
+    def __init__(self) -> None:
+        self.message = (
+            f"Please check if this is the latest emailed link for resetting password"
+        )
+        self.status_code = 400
+        super().__init__(self.message)

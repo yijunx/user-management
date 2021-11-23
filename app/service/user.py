@@ -2,7 +2,11 @@ from datetime import datetime, timezone
 from app.casbin.resource_id_converter import get_resource_id_from_user_id
 from app.casbin.role_definition import ResourceRightsEnum
 from app.db.database import get_db
-from app.exceptions.user import UserEmailAlreadyVerified
+from app.exceptions.user import (
+    UserEmailAlreadyVerified,
+    UserPasswordResetNotSame,
+    UserPasswordResetSaltNotMatch,
+)
 from app.schemas.pagination import QueryPagination
 from app.schemas.user import (
     LoginMethodEnum,
@@ -97,6 +101,26 @@ def send_email_verification(user_in_token: UserInDecodedToken) -> None:
         )
 
 
+def send_email_for_password_reset(
+    email: str
+) -> None:
+    with get_db() as db:
+        db_user = userRepo.get_by_email(db=db, email=email)
+        user = User.from_orm(db_user)
+        token = encode_email_verification_token(
+            user_in_email_verification=UserInLinkVerification(**user.dict())
+        )
+        celery.send_task(
+            name=f"{conf.CELERY_SERVICE_NAME}.{CeleryTaskEnum.password_reset}",
+            kwargs={
+                "token": token,
+                "login_method": user.login_method,
+                "user_email": user.email,
+            },
+            queue=conf.CELERY_QUEUE,
+        )
+
+
 def list_users(query_pagination: QueryPagination) -> UserWithPaging:
     with get_db() as db:
         db_items, paging = userRepo.get_all(db=db, query_pagination=query_pagination)
@@ -153,18 +177,19 @@ def update_user_detail(item_id: str, user_patch: UserPatch) -> UserInResponse:
     return UserInResponse(**item.dict())
 
 
-def update_user_password(item_id: str, new_password: str, new_password_again: str, salt: str) -> None:
+def update_user_password(
+    item_id: str, new_password: str, new_password_again: str, salt: str
+) -> None:
     with get_db() as db:
         if new_password_again != new_password:
-            raise
+            raise UserPasswordResetNotSame()
         db_item = userRepo.get(db=db, item_id=item_id)
         if salt != db_item.salt:
-            raise
+            raise UserPasswordResetSaltNotMatch()
         # well the salt will be reset too
         new_salt, new_hashed_password = create_hashed_password(password=new_password)
         db_item.salt = new_salt
-        db_item.hashed_password = new_hashed_password    
-    return
+        db_item.hashed_password = new_hashed_password
 
 
 def unregister_user(item_id: str) -> None:

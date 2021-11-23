@@ -26,6 +26,8 @@ from app.exceptions.user import (
     UserDoesNotExist,
     UserEmailAlreadyExist,
     UserEmailAlreadyVerified,
+    UserPasswordResetNotSame,
+    UserPasswordResetSaltNotMatch,
 )
 from flask_wtf import csrf
 from app.util.password import verify_password
@@ -103,6 +105,8 @@ def reset_password_link_verification(query: UserPasswordResetVerificationParam):
         return create_response(success=False, message=str(e), status_code=e.status_code)
     if user.salt == user_in_link_verification.salt:
         # here user is valid.. then this page can be used
+        # now user is there, password is ok, page can be rendered 
+        # for the user to key in the new password and new password again
         return create_response(success=True)
     return create_response(success=False, status_code=400)
 
@@ -111,18 +115,20 @@ def reset_password_link_verification(query: UserPasswordResetVerificationParam):
 @validate()
 def reset_password_without_login(body: UserPasswordResetVerificationPayload):
     """requires token, and new password, and new password again"""
-    user_in_link_verification = UserInLinkVerification(
-        **decode_token(token=body.token)
-    )
+    user_in_link_verification = UserInLinkVerification(**decode_token(token=body.token))
     try:
-        _ser = userService.update_user_password(
+        _ = userService.update_user_password(
             item_id=user_in_link_verification.id,
             new_password=body.new_password,
             new_password_again=body.new_password_again,
-            salt=user_in_link_verification.salt
+            salt=user_in_link_verification.salt,
         )
-        
-    except UserDoesNotExist as e:
+
+    except (
+        UserDoesNotExist,
+        UserPasswordResetSaltNotMatch,
+        UserPasswordResetNotSame,
+    ) as e:
         return create_response(success=False, message=str(e), status_code=e.status_code)
     except Exception as e:
         logger.debug(e, exc_info=True)
@@ -234,7 +240,7 @@ def logout():
 @bp.route("/send_email_verification", methods=["POST"])
 @validate()
 def send_verify_email():
-    """this is for user to ask for email verification again, 
+    """this is for user to ask for email verification again,
     this is only for logged in user"""
     user_in_token = get_user_info_from_request(request=request)
     try:
