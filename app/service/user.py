@@ -101,9 +101,7 @@ def send_email_verification(user_in_token: UserInDecodedToken) -> None:
         )
 
 
-def send_email_for_password_reset(
-    email: str
-) -> None:
+def send_email_for_password_reset(email: str) -> None:
     with get_db() as db:
         db_user = userRepo.get_by_email(db=db, email=email)
         user = User.from_orm(db_user)
@@ -178,13 +176,13 @@ def update_user_detail(item_id: str, user_patch: UserPatch) -> UserInResponse:
 
 
 def update_user_password(
-    item_id: str, new_password: str, new_password_again: str, salt: str
+    item_id: str, new_password: str, new_password_again: str, salt: str = None
 ) -> None:
     with get_db() as db:
         if new_password_again != new_password:
             raise UserPasswordResetNotSame()
         db_item = userRepo.get(db=db, item_id=item_id)
-        if salt != db_item.salt:
+        if salt and salt != db_item.salt:
             raise UserPasswordResetSaltNotMatch()
         # well the salt will be reset too
         new_salt, new_hashed_password = create_hashed_password(password=new_password)

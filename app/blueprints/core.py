@@ -79,7 +79,7 @@ def forget_password(body: UserForgetPassword):
     """this function sends user a link to reset password
     in this link, there is a token, no one can fake the token"""
     try:
-        user = userService
+        userService.send_email_for_password_reset(email=body.email)
     except UserDoesNotExist as e:
         return create_response(success=False, message=str(e), status_code=e.status_code)
     except Exception as e:
@@ -105,17 +105,23 @@ def reset_password_link_verification(query: UserPasswordResetVerificationParam):
         return create_response(success=False, message=str(e), status_code=e.status_code)
     if user.salt == user_in_link_verification.salt:
         # here user is valid.. then this page can be used
-        # now user is there, password is ok, page can be rendered 
+        # now user is there, password is ok, page can be rendered
         # for the user to key in the new password and new password again
         return create_response(success=True)
     return create_response(success=False, status_code=400)
 
 
-@bp.route("/reset_password_without_login", methods=["GET"])
+@bp.route("/reset_password_without_login", methods=["POST"])
 @validate()
 def reset_password_without_login(body: UserPasswordResetVerificationPayload):
     """requires token, and new password, and new password again"""
-    user_in_link_verification = UserInLinkVerification(**decode_token(token=body.token))
+    if body.token:
+        user_in_link_verification = UserInLinkVerification(
+            **decode_token(token=body.token)
+        )
+    else:
+        return create_response(success=False, message="no token provided")
+
     try:
         _ = userService.update_user_password(
             item_id=user_in_link_verification.id,
@@ -123,7 +129,6 @@ def reset_password_without_login(body: UserPasswordResetVerificationPayload):
             new_password_again=body.new_password_again,
             salt=user_in_link_verification.salt,
         )
-
     except (
         UserDoesNotExist,
         UserPasswordResetSaltNotMatch,
@@ -251,6 +256,28 @@ def send_verify_email():
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
     return create_response(status=200, message="verification email sent!!!")
+
+
+@bp.route("/reset_password_after_login", methods=["POST"])
+@validate()
+def reset_password_without_login(body: UserPasswordResetVerificationPayload):
+    """requires token, and new password, and new password again"""
+    user_in_token = get_user_info_from_request(request=request)
+    try:
+        _ = userService.update_user_password(
+            item_id=user_in_token.id,
+            new_password=body.new_password,
+            new_password_again=body.new_password_again,
+        )
+    except (
+        UserDoesNotExist,
+        UserPasswordResetNotSame,
+    ) as e:
+        return create_response(success=False, message=str(e), status_code=e.status_code)
+    except Exception as e:
+        logger.debug(e, exc_info=True)
+        return create_response(success=False, message=str(e), status_code=500)
+    return create_response(success=True)
 
 
 @bp.route("/authenticate", methods=["POST"])

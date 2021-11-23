@@ -64,12 +64,6 @@ class UserPatch(BaseModel):
     # password: Optional[str]
 
 
-class UserPasswordPatch(BaseModel):
-    """use for user update passeword"""
-
-    password: str
-
-
 class UserWithPaging(BaseModel):
     data: List[UserInResponse]
     paging: ResponsePagination
@@ -90,7 +84,7 @@ class UserPasswordResetVerificationParam(BaseModel):
 
 
 class UserPasswordResetVerificationPayload(BaseModel):
-    token: str
+    token: Optional[str]
     new_password: str
     new_password_again: str
 
