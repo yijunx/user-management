@@ -22,6 +22,10 @@ class UserRegisterWithPassword(BaseModel):
     password: str
 
 
+class UserForgetPassword(BaseModel):
+    email: str
+
+
 class UserCreate(BaseModel):
     name: str
     email: str
@@ -81,8 +85,19 @@ class UserEmailVerificationParam(BaseModel):
     token: str
 
 
-class UserInEmailVerification(UserInResponse):
+class UserPasswordResetVerificationParam(BaseModel):
+    token: str
+
+
+class UserPasswordResetVerificationPayload(BaseModel):
+    token: str
+    new_password: str
+    new_password_again: str
+
+
+class UserInLinkVerification(UserInResponse):
     """here salt is added to make sure the no false link
     when backend check the token in email verification
     will check if the salt is same as user's salt"""
+
     salt: str
