@@ -14,3 +14,21 @@ class UserEmailAlreadyExist(Exception):
         self.message = f"User with email {email} already exists"
         self.status_code = 409
         super().__init__(self.message)
+
+
+class UserEmailNotVerified(Exception):
+    """raised when user email is not verified"""
+
+    def __init__(self) -> None:
+        self.message = f"Email is not verified"
+        self.status_code = 400
+        super().__init__(self.message)
+
+
+class UserEmailAlreadyVerified(Exception):
+    """raised when user email is not verified"""
+
+    def __init__(self) -> None:
+        self.message = f"Email already verified"
+        self.status_code = 400
+        super().__init__(self.message)

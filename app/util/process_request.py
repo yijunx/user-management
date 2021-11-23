@@ -4,7 +4,7 @@ import os
 from app.schemas.user import (
     GoogleUser,
     UserInDecodedToken,
-    UserInEmailVerification,
+    UserInLinkVerification,
     User,
 )
 from flask import Request, abort
@@ -34,7 +34,7 @@ def get_private_key():
 
 
 def encode_email_verification_token(
-    user_in_email_verification: UserInEmailVerification,
+    user_in_email_verification: UserInLinkVerification,
 ) -> str:
     additional_token_payload = {
         # "exp": datetime.now(timezone.utc) + timedelta(seconds=60 * 60 * 48),

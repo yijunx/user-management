@@ -22,7 +22,11 @@ from app.util.process_request import (
     get_google_user_from_request,
     encode_access_token,
 )
-from app.exceptions.user import UserDoesNotExist, UserEmailAlreadyExist
+from app.exceptions.user import (
+    UserDoesNotExist,
+    UserEmailAlreadyExist,
+    UserEmailAlreadyVerified,
+)
 from flask_wtf import csrf
 from app.util.password import verify_password
 
@@ -209,6 +213,21 @@ def logout():
     user_in_token = get_user_info_from_request(request=request)
     userService.update_user_logout_time(item_id=user_in_token.id)
     return create_response(message="you are logged out", cookies_to_delete=["token"])
+
+
+@bp.route("/send_email_verification", methods=["POST"])
+@validate()
+def send_verify_email(query: UserEmailVerificationParam):
+    """this is for user to ask for email verification again, this is only for logged in user"""
+    user_in_token = get_user_info_from_request(request=request)
+    try:
+        userService.send_email_verification(user_in_token=user_in_token)
+    except (UserDoesNotExist, UserEmailAlreadyVerified) as e:
+        return create_response(success=False, message=e.message, status=403)
+    except Exception as e:
+        logger.debug(e, exc_info=True)
+        return create_response(success=False, message=str(e), status_code=500)
+    return create_response(status=200, message="verification email sent!!!")
 
 
 @bp.route("/authenticate", methods=["POST"])

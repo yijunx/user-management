@@ -1,6 +1,6 @@
 from unittest.mock import patch
 from app.schemas.user import (
-    UserInEmailVerification,
+    UserInLinkVerification,
     UserLoginWithPassword,
     UserRegisterWithPassword,
     UserInResponse,
@@ -61,7 +61,7 @@ def test_register_user_with_password(
     user_in_db = userRepo.get(db=db, item_id=user_in_response.id)
     global EMAIL_VERIFICATION_TOKEN
     EMAIL_VERIFICATION_TOKEN = encode_email_verification_token(
-        user_in_email_verification=UserInEmailVerification(
+        user_in_email_verification=UserInLinkVerification(
             **user_in_response.dict(), salt=user_in_db.salt
         )
     )

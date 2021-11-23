@@ -1,6 +1,6 @@
 from unittest.mock import patch
 from app.schemas.user import (
-    UserInEmailVerification,
+    UserInLinkVerification,
     UserLoginWithPassword,
     UserRegisterWithPassword,
     UserInResponse,

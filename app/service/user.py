@@ -2,12 +2,14 @@ from datetime import datetime, timezone
 from app.casbin.resource_id_converter import get_resource_id_from_user_id
 from app.casbin.role_definition import ResourceRightsEnum
 from app.db.database import get_db
+from app.exceptions.user import UserEmailAlreadyVerified
 from app.schemas.pagination import QueryPagination
 from app.schemas.user import (
     LoginMethodEnum,
     UserCreate,
     User,
-    UserInEmailVerification,
+    UserInDecodedToken,
+    UserInLinkVerification,
     UserInResponse,
     UserPatch,
     UserWithPaging,
@@ -64,7 +66,7 @@ def create_user_with_password(name: str, email: str, password) -> User:
             ResourceRightsEnum.own,
         )
         token = encode_email_verification_token(
-            user_in_email_verification=UserInEmailVerification(**user.dict())
+            user_in_email_verification=UserInLinkVerification(**user.dict())
         )
         celery.send_task(
             name=f"{conf.CELERY_SERVICE_NAME}.{CeleryTaskEnum.email_confirmation}",
@@ -73,6 +75,26 @@ def create_user_with_password(name: str, email: str, password) -> User:
         )
 
     return user
+
+
+def send_email_verification(user_in_token: UserInDecodedToken) -> None:
+    with get_db() as db:
+        db_user = userRepo.get(db=db, item_id=user_in_token.id)
+        if db_user.login_method == LoginMethodEnum.google or db_user.email_verified:
+            raise UserEmailAlreadyVerified()
+        user = User.from_orm(db_user)
+        token = encode_email_verification_token(
+            user_in_email_verification=UserInLinkVerification(**user.dict())
+        )
+        celery.send_task(
+            name=f"{conf.CELERY_SERVICE_NAME}.{CeleryTaskEnum.email_confirmation}",
+            kwargs={
+                "token": token,
+                "user_name": user.name,
+                "user_email": user.email,
+            },
+            queue=conf.CELERY_QUEUE,
+        )
 
 
 def list_users(query_pagination: QueryPagination) -> UserWithPaging:
