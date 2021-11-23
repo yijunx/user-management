@@ -153,7 +153,17 @@ def update_user_detail(item_id: str, user_patch: UserPatch) -> UserInResponse:
     return UserInResponse(**item.dict())
 
 
-def update_user_password() -> None:
+def update_user_password(item_id: str, new_password: str, new_password_again: str, salt: str) -> None:
+    with get_db() as db:
+        if new_password_again != new_password:
+            raise
+        db_item = userRepo.get(db=db, item_id=item_id)
+        if salt != db_item.salt:
+            raise
+        # well the salt will be reset too
+        new_salt, new_hashed_password = create_hashed_password(password=new_password)
+        db_item.salt = new_salt
+        db_item.hashed_password = new_hashed_password    
     return
 
 

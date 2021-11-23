@@ -91,24 +91,37 @@ def forget_password(body: UserForgetPassword):
 def reset_password_link_verification(query: UserPasswordResetVerificationParam):
     """the page will check here to verify the password
     this will check this is the user who has the access to the email he claimed"""
-    user_in_email_verification = UserInLinkVerification(
+
+    # check if the browser sends the cookie or not
+    # if there is cookie
+    user_in_link_verification = UserInLinkVerification(
         **decode_token(token=query.token)
     )
-    user = userService.get_user(item_id=user_in_email_verification.id)
-    if user.email_verified:
-        return create_response(success=True)
-    if user.salt == user_in_email_verification.salt:
-        userService.update_user_email_verified(item_id=user.id)
+    try:
+        user = userService.get_user(item_id=user_in_link_verification.id)
+    except UserDoesNotExist as e:
+        return create_response(success=False, message=str(e), status_code=e.status_code)
+    if user.salt == user_in_link_verification.salt:
+        # here user is valid.. then this page can be used
         return create_response(success=True)
     return create_response(success=False, status_code=400)
 
 
-@bp.route("/reset_password", methods=["GET"])
+@bp.route("/reset_password_without_login", methods=["GET"])
 @validate()
-def reset_password(body: UserPasswordResetVerificationPayload):
+def reset_password_without_login(body: UserPasswordResetVerificationPayload):
     """requires token, and new password, and new password again"""
+    user_in_link_verification = UserInLinkVerification(
+        **decode_token(token=body.token)
+    )
     try:
-        user = userService
+        _ser = userService.update_user_password(
+            item_id=user_in_link_verification.id,
+            new_password=body.new_password,
+            new_password_again=body.new_password_again,
+            salt=user_in_link_verification.salt
+        )
+        
     except UserDoesNotExist as e:
         return create_response(success=False, message=str(e), status_code=e.status_code)
     except Exception as e:
@@ -120,13 +133,16 @@ def reset_password(body: UserPasswordResetVerificationPayload):
 @bp.route("/email_verification", methods=["GET"])
 @validate()
 def verify_email(query: UserEmailVerificationParam):
-    user_in_email_verification = UserInLinkVerification(
+    user_in_link_verification = UserInLinkVerification(
         **decode_token(token=query.token)
     )
-    user = userService.get_user(item_id=user_in_email_verification.id)
+    try:
+        user = userService.get_user(item_id=user_in_link_verification.id)
+    except UserDoesNotExist as e:
+        return create_response(success=False, message=str(e), status_code=e.status_code)
     if user.email_verified:
         return create_response(success=True)
-    if user.salt == user_in_email_verification.salt:
+    if user.salt == user_in_link_verification.salt:
         userService.update_user_email_verified(item_id=user.id)
         return create_response(success=True)
     return create_response(success=False, status_code=400)
@@ -217,8 +233,9 @@ def logout():
 
 @bp.route("/send_email_verification", methods=["POST"])
 @validate()
-def send_verify_email(query: UserEmailVerificationParam):
-    """this is for user to ask for email verification again, this is only for logged in user"""
+def send_verify_email():
+    """this is for user to ask for email verification again, 
+    this is only for logged in user"""
     user_in_token = get_user_info_from_request(request=request)
     try:
         userService.send_email_verification(user_in_token=user_in_token)
