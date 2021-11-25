@@ -85,3 +85,11 @@ def get_all(
     db_items = query.order_by(models.User.name).limit(limit).offset(offset).all()
     paging.page_size = len(db_items)
     return db_items, paging
+
+
+def get_all_without_pagination(db: Session, item_ids: List[str]) -> List[models.User]:
+    # here is admin is decided by the casbin rules in the service level...
+    query = db.query(models.User)
+    query = query.filter(models.User.id.in_(item_ids))
+    db_items = query.order_by(models.User.name).all()
+    return db_items

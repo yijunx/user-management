@@ -1,6 +1,7 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from app.casbin.role_definition import PolicyTypeEnum
+from app.schemas.pagination import ResponsePagination
 
 
 class CasbinPolicy(BaseModel):
@@ -21,3 +22,8 @@ class CasbinPolicyPatch(BaseModel):
     v0: Optional[str]
     v1: Optional[str]
     v2: Optional[str]
+
+
+class CasbinRuleWithPaging(BaseModel):
+    data: List[CasbinPolicy]
+    paging: ResponsePagination

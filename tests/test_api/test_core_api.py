@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from app.schemas.user import (
     UserInLinkVerification,
     UserLoginWithPassword,
@@ -23,8 +23,14 @@ EMAIL_VERIFICATION_TOKEN = ""
     "app.blueprints.core.get_google_user_from_request",
     return_value=fixture.fake_google_user(),
 )
+@patch(
+    "app.blueprints.core.rbacService.admin_check",
+    return_value={"word_management": False, "user_management": False},
+)
 def test_login_with_user_creation_with_google(
-    mock_get_google_user_from_request, client: FlaskClient
+    mock_get_google_user_from_request: MagicMock,
+    mock_admin_check: MagicMock,
+    client: FlaskClient,
 ):
     r = client.post("/api/login_with_google", headers={"Authorization": "Bearer token"})
     user_in_response = UserInResponse(**r.get_json()["response"])
@@ -38,8 +44,14 @@ def test_login_with_user_creation_with_google(
     "app.blueprints.core.get_google_user_from_request",
     return_value=fixture.fake_google_user(),
 )
+@patch(
+    "app.blueprints.core.rbacService.admin_check",
+    return_value={"word_management": False, "user_management": False},
+)
 def test_login_without_user_creation_with_google(
-    mock_get_google_user_from_request, client: FlaskClient
+    mock_get_google_user_from_request: MagicMock,
+    mock_admin_check: MagicMock,
+    client: FlaskClient,
 ):
     r = client.post("/api/login_with_google", headers={"Authorization": "Bearer token"})
     user_in_response = UserInResponse(**r.get_json()["response"])
@@ -77,8 +89,14 @@ def test_register_same_user_with_password(
     assert r.get_json()["success"] == False
 
 
+@patch(
+    "app.blueprints.core.rbacService.admin_check",
+    return_value={"word_management": False, "user_management": False},
+)
 def test_login_user_with_password_without_email_verified(
-    client: FlaskClient, user_login_with_password: UserLoginWithPassword
+    mock_admin_check: MagicMock,
+    client: FlaskClient,
+    user_login_with_password: UserLoginWithPassword,
 ):
     r = client.post("/api/login", json=user_login_with_password.dict())
     # user_in_response = UserInResponse(**r.get_json()["response"])
@@ -95,8 +113,14 @@ def test_verify_user_email(client: FlaskClient, db: Session):
     assert user_in_db.email_verified == True
 
 
+@patch(
+    "app.blueprints.core.rbacService.admin_check",
+    return_value={"word_management": False, "user_management": False},
+)
 def test_login_user_with_password(
-    client: FlaskClient, user_login_with_password: UserLoginWithPassword
+    mock_admin_check: MagicMock,
+    client: FlaskClient,
+    user_login_with_password: UserLoginWithPassword,
 ):
     r = client.post("/api/login", json=user_login_with_password.dict())
     user_in_response = UserInResponse(**r.get_json()["response"])

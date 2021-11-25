@@ -2,12 +2,14 @@
 from flask import Blueprint, request
 from flask_pydantic import validate
 from app.schemas.user import (
+    User,
     GoogleUser,
     LoginMethodEnum,
     UserEmailVerificationParam,
     UserForgetPassword,
     UserInLinkVerification,
     UserInResponse,
+    UserInResponseWithAdminInfo,
     UserLoginWithPassword,
     UserPasswordResetVerificationParam,
     UserPasswordResetVerificationPayload,
@@ -15,6 +17,7 @@ from app.schemas.user import (
 )
 from app.util.response_util import create_response
 import app.service.user as userService
+import app.service.rbac as rbacService
 from app.util.app_logging import get_logger
 from app.util.process_request import (
     decode_token,
@@ -186,10 +189,13 @@ def login_with_password(body: UserLoginWithPassword):
     # here is some notes about if email is verified.
     # user without verified email cannot do anything
     # can just login, and request verification email again
+    admin_info = rbacService.admin_check(user=user)
     userService.update_user_login_time(item_id=user.id)
-    user_in_reponse = UserInResponse(**user.dict())
+    user_in_reponse_with_admin_info = UserInResponseWithAdminInfo(
+        **user.dict(), admin_info=admin_info
+    )
     return create_response(
-        response=user_in_reponse,
+        response=user_in_reponse_with_admin_info,
         cookies={"token": encode_access_token(user=user)},
     )
 
@@ -227,10 +233,13 @@ def login_with_google():
             )
 
     # now user is good...
+    admin_info = rbacService.admin_check(user=user)
     userService.update_user_login_time(item_id=user.id)
-    user_in_reponse = UserInResponse(**user.dict())
+    user_in_reponse_with_admin_info = UserInResponseWithAdminInfo(
+        **user.dict(), admin_info=admin_info
+    )
     return create_response(
-        response=user_in_reponse,
+        response=user_in_reponse_with_admin_info,
         cookies={"token": encode_access_token(user=user)},
     )
 

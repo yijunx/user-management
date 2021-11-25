@@ -53,6 +53,10 @@ class UserInResponse(BaseModel):
     login_method: LoginMethodEnum
 
 
+class UserInResponseWithAdminInfo(UserInResponse):
+    admin_info: dict
+
+
 class UserInDecodedToken(UserInResponse):
     exp: datetime
     iat: datetime
