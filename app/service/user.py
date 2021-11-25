@@ -34,13 +34,6 @@ def create_user_with_google_login(name: str, email: str) -> User:
     with get_db() as db:
         db_item = userRepo.create(db=db, item_create=user_create)
         user = User.from_orm(db_item)
-        # casbinRepo.create_policy(
-        #     db=db,
-        #     user_id=user.id,
-        #     resource_id=get_resource_id_from_user_id(user.id),
-        #     resource_right=ResourceRightsEnum.own,
-        # )
-
         casbin_enforcer.add_policy(
             user.id,
             get_resource_id_from_user_id(user.id),
@@ -188,13 +181,6 @@ def update_user_password(
         new_salt, new_hashed_password = create_hashed_password(password=new_password)
         db_item.salt = new_salt
         db_item.hashed_password = new_hashed_password
-
-
-def unregister_user(item_id: str) -> None:
-    """this is from user, not admin.."""
-
-    # remember to update the casbin rules
-    pass
 
 
 def delete_user(item_id: str) -> None:
