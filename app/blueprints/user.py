@@ -50,7 +50,6 @@ def create_password_user(body: UserRegisterWithPassword):
 @authorize_user_domain(action=ResourceActionsEnum.list_users)
 @validate()
 def list_users(query: QueryPagination):
-    actor: User = request.environ["actor"]
     try:
         users_with_paging = userService.list_users(query_pagination=query)
     except Exception as e:
@@ -66,7 +65,6 @@ def list_users(query: QueryPagination):
 @authorize_user_domain(action=ResourceActionsEnum.get_detail)
 @validate()
 def get_user(user_id: str):
-    actor: User = request.environ["actor"]
     try:
         user = userService.get_user_in_response(item_id=user_id)
     except UserDoesNotExist as e:
@@ -87,7 +85,6 @@ def get_user(user_id: str):
 @authorize_user_domain(action=ResourceActionsEnum.patch_detail)
 @validate()
 def patch_user(user_id: str, body: UserPatch):
-    actor: User = request.environ["actor"]
     try:
         user = userService.update_user_detail(item_id=user_id, user_patch=body)
     except UserDoesNotExist as e:
@@ -108,7 +105,6 @@ def patch_user(user_id: str, body: UserPatch):
 @authorize_user_domain(action=ResourceActionsEnum.delete_user)
 @validate()
 def delete_user(user_id: str):
-    _: User = request.environ["actor"]
     try:
         userService.delete_user(item_id=user_id)
     except UserDoesNotExist as e:
@@ -121,22 +117,22 @@ def delete_user(user_id: str):
     return create_response(success=False, message="user deleted..")
 
 
-@bp.route("/<user_id>/ban", methods=["POST"])
-@authorize_user_domain(action=ResourceActionsEnum.ban_user)
-@validate()
-def ban_user(user_id: str):
-    actor: User = request.environ["actor"]
-    print(f"ban user {user_id} by {actor.name}, not implemeted yet")
-    pass
+# @bp.route("/<user_id>/ban", methods=["POST"])
+# @authorize_user_domain(action=ResourceActionsEnum.ban_user)
+# @validate()
+# def ban_user(user_id: str):
+#     actor: User = request.environ["actor"]
+#     print(f"ban user {user_id} by {actor.name}, not implemeted yet")
+#     pass
 
 
-@bp.route("/<user_id>/unban", methods=["POST"])
-@authorize_user_domain(action=ResourceActionsEnum.unban_user)
-@validate()
-def unban_user(user_id: str):
-    actor: User = request.environ["actor"]
-    print(f"unban user {user_id} by {actor.name}, not implemeted yet")
-    pass
+# @bp.route("/<user_id>/unban", methods=["POST"])
+# @authorize_user_domain(action=ResourceActionsEnum.unban_user)
+# @validate()
+# def unban_user(user_id: str):
+#     actor: User = request.environ["actor"]
+#     print(f"unban user {user_id} by {actor.name}, not implemeted yet")
+#     pass
 
 
 @bp.route("/<user_id>/roles", methods=["GET"])

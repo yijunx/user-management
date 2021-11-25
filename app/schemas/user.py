@@ -41,6 +41,8 @@ class User(UserCreate):
     last_login: Optional[datetime]
     last_logout: Optional[datetime]
 
+    banned: bool
+
     class Config:
         orm_mode = True
 

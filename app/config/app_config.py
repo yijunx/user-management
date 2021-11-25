@@ -18,7 +18,9 @@ class Settings(BaseSettings):
     USER_ADMIN_ROLE_ID: str
 
     RESOURCE_NAME_USER: str = "users/"
-    OTHER_SERVICES_URL: str = "not set up yet"
+    WORD_MANAGEMENT_RBAC_URL: str
+
+    # MINIO STUFF
 
     CELERY_SERVICE_NAME: str
     CELERY_BROKER: str

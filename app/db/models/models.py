@@ -25,6 +25,10 @@ class User(Base):
     hashed_password = Column(String, nullable=True)
     email_verified = Column(Boolean, nullable=True)
 
+    # baned or active
+    banned = Column(Boolean, nullable=False)
+    # if banned, authentication will now allow to pass
+
 
 class CasbinRule(Base):
     __tablename__ = "casbin_rule"

@@ -260,7 +260,7 @@ def send_verify_email():
 
 @bp.route("/reset_password_after_login", methods=["POST"])
 @validate()
-def reset_password_without_login(body: UserPasswordResetVerificationPayload):
+def reset_password_after_login(body: UserPasswordResetVerificationPayload):
     """requires token, and new password, and new password again"""
     user_in_token = get_user_info_from_request(request=request)
     try:
