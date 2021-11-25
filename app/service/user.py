@@ -20,6 +20,7 @@ from app.schemas.user import (
 )
 from app.util.password import create_hashed_password
 import app.repo.user as userRepo
+import app.repo.casbin as CasbinRepo
 from typing import Union
 from app.casbin.enforcer import casbin_enforcer
 from app.util.async_worker import celery, CeleryTaskEnum
@@ -194,3 +195,33 @@ def delete_user(item_id: str) -> None:
         # casbinRepo.delete_policies_by_resource_id(
         #     db=db, resource_id=get_resource_id_from_user_id(item_id)
         # )
+
+
+def ban_user(item_id: str) -> None:
+    """only admin can do this"""
+    with get_db() as db:
+        db_user = userRepo.get(db=db, item_id=item_id)
+        # check if user is admin
+        admin_role = CasbinRepo.get_grouping(
+            db=db, role_id=conf.USER_ADMIN_ROLE_ID, user_id=item_id
+        )
+        if admin_role:
+            raise Exception("cannot ban admin")
+        if db_user.banned:
+            raise Exception("already banned")
+        db_user.banned = True
+
+
+def unban_user(item_id: str) -> None:
+    """only admin can do this"""
+    with get_db() as db:
+        db_user = userRepo.get(db=db, item_id=item_id)
+        # check if user is admin
+        admin_role = CasbinRepo.get_grouping(
+            db=db, role_id=conf.USER_ADMIN_ROLE_ID, user_id=item_id
+        )
+        if admin_role:
+            raise Exception("cannot unban admin")
+        if not db_user.banned:
+            raise Exception("user not banned")
+        db_user.banned = False

@@ -117,22 +117,34 @@ def delete_user(user_id: str):
     return create_response(success=False, message="user deleted..")
 
 
-# @bp.route("/<user_id>/ban", methods=["POST"])
-# @authorize_user_domain(action=ResourceActionsEnum.ban_user)
-# @validate()
-# def ban_user(user_id: str):
-#     actor: User = request.environ["actor"]
-#     print(f"ban user {user_id} by {actor.name}, not implemeted yet")
-#     pass
+@bp.route("/<user_id>/ban", methods=["POST"])
+@authorize_user_domain(action=ResourceActionsEnum.ban_user)
+def ban_user(user_id: str):
+    try:
+        userService.ban_user(item_id=user_id)
+    except UserDoesNotExist as e:
+        return create_response(
+            success=False, message=e.message, status_code=e.status_code
+        )
+    except Exception as e:
+        logger.debug(e, exc_info=True)
+        return create_response(success=False, message=str(e), status_code=500)
+    return create_response(success=False, message="user banned..")
 
 
-# @bp.route("/<user_id>/unban", methods=["POST"])
-# @authorize_user_domain(action=ResourceActionsEnum.unban_user)
-# @validate()
-# def unban_user(user_id: str):
-#     actor: User = request.environ["actor"]
-#     print(f"unban user {user_id} by {actor.name}, not implemeted yet")
-#     pass
+@bp.route("/<user_id>/unban", methods=["POST"])
+@authorize_user_domain(action=ResourceActionsEnum.unban_user)
+def unban_user(user_id: str):
+    try:
+        userService.unban_user(item_id=user_id)
+    except UserDoesNotExist as e:
+        return create_response(
+            success=False, message=e.message, status_code=e.status_code
+        )
+    except Exception as e:
+        logger.debug(e, exc_info=True)
+        return create_response(success=False, message=str(e), status_code=500)
+    return create_response(success=False, message="user unbanned..")
 
 
 @bp.route("/<user_id>/roles", methods=["GET"])

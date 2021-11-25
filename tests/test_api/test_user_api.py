@@ -66,6 +66,18 @@ def test_patch_user_from_user(client_from_user: FlaskClient, user_email: str):
 #     r = client_from_user.delete(f"/api/users/{user.id}")
 #     assert r.status_code == 403
 
+def test_ban_user_from_admin(client_from_admin: FlaskClient, user_email: str):
+    user = get_user_with_email(email=user_email)
+    r = client_from_admin.post(f"/api/users/{user.id}/ban")
+    assert r .status_code == 200
+
+
+def test_unban_user_from_admin(client_from_admin: FlaskClient, user_email: str):
+    user = get_user_with_email(email=user_email)
+    r = client_from_admin.post(f"/api/users/{user.id}/unban")
+    assert r .status_code == 200
+
+
 
 def test_delete_user_from_admin(client_from_admin: FlaskClient, user_email: str):
     user = get_user_with_email(email=user_email)

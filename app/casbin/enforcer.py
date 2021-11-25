@@ -6,7 +6,6 @@ from app.casbin.role_definition import (
     resource_right_action_mapping,
 )
 from app.casbin.seed import seed_or_get_admin_user
-import os
 
 
 def create_casbin_enforcer():
@@ -48,10 +47,10 @@ def create_casbin_enforcer():
 
     # well need to group all below stuff into seed...
     casbin_enforcer.add_policy(
-        "admin-role-id", conf.RESOURCE_NAME_USER, ResourceRightsEnum.admin
+        conf.USER_ADMIN_ROLE_ID, conf.RESOURCE_NAME_USER, ResourceRightsEnum.admin
     )
     admin_user_id = seed_or_get_admin_user()
-    casbin_enforcer.add_grouping_policy(admin_user_id, "admin-role-id")
+    casbin_enforcer.add_grouping_policy(admin_user_id, conf.USER_ADMIN_ROLE_ID)
     return casbin_enforcer
 
 

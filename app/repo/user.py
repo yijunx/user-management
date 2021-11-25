@@ -20,7 +20,7 @@ def create(db: Session, item_create: UserCreate, item_id: str = None) -> models.
         salt=item_create.salt,
         hashed_password=item_create.hashed_password,
         email_verified=item_create.email_verified,
-        banned=False
+        banned=False,
     )
     db.add(db_item)
     try:

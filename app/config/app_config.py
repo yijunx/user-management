@@ -17,7 +17,6 @@ class Settings(BaseSettings):
     CORS_ALLOWED_ORIGINS: str
     USER_ADMIN_ROLE_ID: str
 
-    RESOURCE_NAME_USER: str = "users/"
     WORD_MANAGEMENT_RBAC_URL: str
 
     # MINIO STUFF
@@ -25,6 +24,9 @@ class Settings(BaseSettings):
     CELERY_SERVICE_NAME: str
     CELERY_BROKER: str
     CELERY_QUEUE: str
+
+    # this is fixed
+    RESOURCE_NAME_USER: str = "users/"
 
 
 class ProdConfig(Settings):
