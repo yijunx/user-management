@@ -3,6 +3,7 @@ from app.casbin.resource_id_converter import get_resource_id_from_user_id
 from app.casbin.role_definition import ResourceRightsEnum
 from app.db.database import get_db
 from app.exceptions.user import (
+    UserDoesNotExist,
     UserEmailAlreadyVerified,
     UserPasswordResetNotSame,
     UserPasswordResetSaltNotMatch,
@@ -98,6 +99,8 @@ def send_email_verification(user_in_token: UserInDecodedToken) -> None:
 def send_email_for_password_reset(email: str) -> None:
     with get_db() as db:
         db_user = userRepo.get_by_email(db=db, email=email)
+        if db_user is None:
+            raise UserDoesNotExist(user_id=email)
         user = User.from_orm(db_user)
         token = encode_email_verification_token(
             user_in_email_verification=UserInLinkVerification(**user.dict())
@@ -108,6 +111,7 @@ def send_email_for_password_reset(email: str) -> None:
                 "token": token,
                 "login_method": user.login_method,
                 "user_email": user.email,
+                "user_name": user.name
             },
             queue=conf.CELERY_QUEUE,
         )
