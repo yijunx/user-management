@@ -50,6 +50,7 @@ class User(UserCreate):
 class UserInResponse(BaseModel):
     id: str
     name: str
+    email_verified: Optional[bool]
     login_method: LoginMethodEnum
 
 
