@@ -72,7 +72,7 @@ def password_user_register(body: UserRegisterWithPassword):
         success=True,
         status_code=201,
         response=user_in_response,
-        message="User registered, pls check email and verify it, pls pls pls",
+        message=f"你好! {body.name}, 欢迎👏",
     )
 
 
@@ -88,14 +88,15 @@ def forget_password(body: UserForgetPassword):
     except Exception as e:
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
-    return create_response(success=True)
+    return create_response(success=True, message="密码重置邮件已发送，请点击里面的链接")
 
 
 @bp.route("/reset_password_verification", methods=["GET"])
 @validate()
 def reset_password_link_verification(query: UserPasswordResetVerificationParam):
     """the page will check here to verify the password
-    this will check this is the user who has the access to the email he claimed"""
+    this will check this is the user who has the access to the email he claimed
+    well this endpoint has no use..."""
 
     # check if the browser sends the cookie or not
     # if there is cookie
@@ -141,7 +142,7 @@ def reset_password_without_login(body: UserPasswordResetVerificationPayload):
     except Exception as e:
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
-    return create_response(success=True)
+    return create_response(success=True, message="成功重置密码👏")
 
 
 @bp.route("/email_verification", methods=["GET"])
@@ -155,10 +156,10 @@ def verify_email(query: UserEmailVerificationParam):
     except UserDoesNotExist as e:
         return create_response(success=False, message=str(e), status_code=e.status_code)
     if user.email_verified:
-        return create_response(success=True)
+        return create_response(success=True, message="成功验证电子邮件地址👏 （但是你已经验证过啦）")
     if user.salt == user_in_link_verification.salt:
         userService.update_user_email_verified(item_id=user.id)
-        return create_response(success=True)
+        return create_response(success=True, message="成功验证电子邮件地址👏")
     return create_response(success=False, status_code=400)
 
 
@@ -168,19 +169,13 @@ def login_with_password(body: UserLoginWithPassword):
     # user_login = request.body_params
     user = userService.get_user_with_email(email=body.email)
     if user is None:
-        return create_response(
-            success=False, status_code=401, message="Email or Password is incorrect"
-        )
+        return create_response(success=False, status_code=401, message="密码或者电子邮箱填错了")
     if user.login_method != LoginMethodEnum.password:
-        return create_response(
-            success=False, status_code=409, message="Please login with google"
-        )
+        return create_response(success=False, status_code=409, message="请用Google登陆")
     if not verify_password(
         password=body.password, salt=user.salt, hashed_password=user.hashed_password
     ):
-        return create_response(
-            success=False, status_code=401, message="Email or Password is incorrect"
-        )
+        return create_response(success=False, status_code=401, message="密码或者电子邮箱填错啦")
     # if not user.email_verified:
     #     return create_response(
     #         success=False, status_code=406, message="Email not verified"

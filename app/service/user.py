@@ -47,8 +47,8 @@ def create_user_with_google_login(name: str, email: str) -> User:
 def create_user_with_password(name: str, email: str, password) -> User:
     salt, hashed_password = create_hashed_password(password=password)
     user_create = UserCreate(
-        name=name,
-        email=email,
+        name=name.strip(),
+        email=email.lower().strip(),
         created_at=datetime.now(timezone.utc),
         login_method=LoginMethodEnum.password,
         salt=salt,
@@ -111,7 +111,7 @@ def send_email_for_password_reset(email: str) -> None:
                 "token": token,
                 "login_method": user.login_method,
                 "user_email": user.email,
-                "user_name": user.name
+                "user_name": user.name,
             },
             queue=conf.CELERY_QUEUE,
         )
@@ -143,7 +143,7 @@ def get_user_in_response(item_id: str) -> UserInResponse:
 
 def get_user_with_email(email: str) -> Union[User, None]:
     with get_db() as db:
-        db_item = userRepo.get_by_email(db=db, email=email)
+        db_item = userRepo.get_by_email(db=db, email=email.lower().strip())
         item = None if db_item is None else User.from_orm(db_item)
     return item
 
