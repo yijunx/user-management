@@ -184,7 +184,7 @@ def login_with_password(body: UserLoginWithPassword):
     # here is some notes about if email is verified.
     # user without verified email cannot do anything
     # can just login, and request verification email again
-    admin_info = rbacService.admin_check(user=user)
+    admin_info = rbacService.admin_check(user_id=user.id)
     userService.update_user_login_time(item_id=user.id)
     user_in_reponse_with_admin_info = UserInResponseWithAdminInfo(
         **user.dict(), admin_info=admin_info
@@ -228,7 +228,7 @@ def login_with_google():
             )
 
     # now user is good...
-    admin_info = rbacService.admin_check(user=user)
+    admin_info = rbacService.admin_check(user_id=user.id)
     userService.update_user_login_time(item_id=user.id)
     user_in_reponse_with_admin_info = UserInResponseWithAdminInfo(
         **user.dict(), admin_info=admin_info

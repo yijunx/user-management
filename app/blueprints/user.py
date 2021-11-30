@@ -5,11 +5,13 @@ from app.casbin.role_definition import ResourceActionsEnum
 from app.schemas.pagination import QueryPagination
 from app.schemas.user import (
     UserInResponse,
+    UserInResponseWithAdminInfo,
     UserPatch,
     UserRegisterWithPassword,
     User,
 )
 import app.service.user as userService
+import app.service.rbac as rbacService
 from app.util.app_logging import get_logger
 from app.exceptions.user import UserDoesNotExist, UserEmailAlreadyExist
 from app.casbin.decorator import authorize_user_domain
@@ -67,6 +69,10 @@ def list_users(query: QueryPagination):
 def get_user(user_id: str):
     try:
         user = userService.get_user_in_response(item_id=user_id)
+        admin_info = rbacService.admin_check(user_id=user.id)
+        user_in_reponse_with_admin_info = UserInResponseWithAdminInfo(
+            **user.dict(), admin_info=admin_info
+        )
     except UserDoesNotExist as e:
         return create_response(
             success=False, message=e.message, status_code=e.status_code
@@ -77,7 +83,7 @@ def get_user(user_id: str):
     return create_response(
         success=True,
         status_code=200,
-        response=user,
+        response=user_in_reponse_with_admin_info,
     )
 
 
@@ -87,6 +93,7 @@ def get_user(user_id: str):
 def patch_user(user_id: str, body: UserPatch):
     try:
         user = userService.update_user_detail(item_id=user_id, user_patch=body)
+        
     except UserDoesNotExist as e:
         return create_response(
             success=False, message=e.message, status_code=e.status_code

@@ -80,11 +80,11 @@ def is_admin_here(user_id: str) -> bool:
     return False
 
 
-def admin_check(user: User) -> dict:
+def admin_check(user_id: str) -> dict:
     is_word_service_admin = is_admin(
-        service=ServiceEnum.word_management, user_id=user.id
+        service=ServiceEnum.word_management, user_id=user_id
     )
-    is_user_service_admin = is_admin_here(user_id=user.id)
+    is_user_service_admin = is_admin_here(user_id=user_id)
     return {
         ServiceEnum.word_management: is_word_service_admin,
         ServiceEnum.user_management: is_user_service_admin,
