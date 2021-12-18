@@ -45,10 +45,11 @@ def test_list_users_from_user(client_from_user: FlaskClient):
 
 
 def test_get_user_from_user(client_from_user: FlaskClient, user_email: str):
+    """requires word management to be up.."""
     user = get_user_with_email(email=user_email)
     r = client_from_user.get(f"/api/users/{user.id}")
-    user_in_response = UserInResponse(**r.get_json()["response"])
     assert r.status_code == 200
+    user_in_response = UserInResponse(**r.get_json()["response"])
     assert user_in_response.name == user.name
 
 
