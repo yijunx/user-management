@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 from app.casbin.resource_id_converter import get_resource_id_from_user_id
-from app.casbin.role_definition import ResourceRightsEnum
+from app.casbin.role_definition import ResourceActionsEnum, ResourceRightsEnum
 from app.db.database import get_db
+from app.exceptions.rbac import NotAuthorized
 from app.exceptions.user import (
     UserDoesNotExist,
     UserEmailAlreadyVerified,
@@ -23,7 +24,8 @@ from app.util.password import create_hashed_password
 import app.repo.user as userRepo
 import app.repo.casbin as CasbinRepo
 from typing import Union
-from app.casbin.enforcer import casbin_enforcer
+
+# from app.casbin.enforcer import casbin_enforcer
 from app.util.async_worker import celery, CeleryTaskEnum
 from app.util.process_request import encode_email_verification_token
 from app.config.app_config import conf
@@ -36,11 +38,11 @@ def create_user_with_google_login(name: str, email: str) -> User:
     with get_db() as db:
         db_item = userRepo.create(db=db, item_create=user_create)
         user = User.from_orm(db_item)
-        casbin_enforcer.add_policy(
-            user.id,
-            get_resource_id_from_user_id(user.id),
-            ResourceRightsEnum.own,
-        )
+        # casbin_enforcer.add_policy(
+        #     user.id,
+        #     get_resource_id_from_user_id(user.id),
+        #     ResourceRightsEnum.own,
+        # )
     return user
 
 
@@ -59,11 +61,11 @@ def create_user_with_password(name: str, email: str, password) -> User:
         db_item = userRepo.create(db=db, item_create=user_create)
         user = User.from_orm(db_item)
         # this user himself is the owner of himself
-        casbin_enforcer.add_policy(
-            user.id,
-            get_resource_id_from_user_id(user.id),
-            ResourceRightsEnum.own,
-        )
+        # casbin_enforcer.add_policy(
+        #     user.id,
+        #     get_resource_id_from_user_id(user.id),
+        #     ResourceRightsEnum.own,
+        # )
         token = encode_email_verification_token(
             user_in_email_verification=UserInLinkVerification(**user.dict())
         )
@@ -127,16 +129,30 @@ def list_users(query_pagination: QueryPagination) -> UserWithPaging:
     return UserWithPaging(data=items, paging=paging)
 
 
-def get_user(item_id: str) -> User:
+def get_user(item_id: str, actor: User = None) -> User:
     with get_db() as db:
         db_item = userRepo.get(db=db, item_id=item_id)
+        if actor:
+            if actor.id != db_item.id:
+                raise NotAuthorized(
+                    resource_id=get_resource_id_from_user_id(item_id=item_id),
+                    action=ResourceActionsEnum.get_detail,
+                    user_id=actor.id,
+                )
         item = User.from_orm(db_item)
     return item
 
 
-def get_user_in_response(item_id: str) -> UserInResponse:
+def get_user_in_response(item_id: str, actor: User = None) -> UserInResponse:
     with get_db() as db:
         db_item = userRepo.get(db=db, item_id=item_id)
+        if actor:
+            if actor.id != db_item.id:
+                raise NotAuthorized(
+                    resource_id=get_resource_id_from_user_id(item_id=item_id),
+                    action=ResourceActionsEnum.get_detail,
+                    user_id=actor.id,
+                )
         item = User.from_orm(db_item)
     return UserInResponse(**item.dict())
 
@@ -166,9 +182,17 @@ def update_user_logout_time(item_id: str) -> None:
         db_item.last_logout = datetime.now(timezone.utc)
 
 
-def update_user_detail(item_id: str, user_patch: UserPatch) -> UserInResponse:
+def update_user_detail(
+    item_id: str, user_patch: UserPatch, actor: User
+) -> UserInResponse:
     with get_db() as db:
         db_item = userRepo.patch(db=db, item_id=item_id, item_patch=user_patch)
+        if actor.id != db_item.id:
+            raise NotAuthorized(
+                resource_id=get_resource_id_from_user_id(item_id=item_id),
+                action=ResourceActionsEnum.get_detail,
+                user_id=actor.id,
+            )
         item = User.from_orm(db_item)
     return UserInResponse(**item.dict())
 
@@ -193,9 +217,9 @@ def delete_user(item_id: str) -> None:
     with get_db() as db:
         userRepo.delete(db=db, item_id=item_id)
         # the below step should be down via db...
-        casbin_enforcer.remove_policy(
-            item_id, get_resource_id_from_user_id(item_id), ResourceRightsEnum.own
-        )
+        # casbin_enforcer.remove_policy(
+        #     item_id, get_resource_id_from_user_id(item_id), ResourceRightsEnum.own
+        # )
         # casbinRepo.delete_policies_by_resource_id(
         #     db=db, resource_id=get_resource_id_from_user_id(item_id)
         # )

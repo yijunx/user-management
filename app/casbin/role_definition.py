@@ -45,12 +45,12 @@ class ResourceActionsEnum(str, Enum):
 # this is make sure that, own covers edit, edit covers view
 # this also supports other relations, very customization
 resource_right_action_mapping: dict = {
-    ResourceRightsEnum.own: {
-        ResourceActionsEnum.get_detail,
-        ResourceActionsEnum.patch_detail,
-        ResourceActionsEnum.unregister,
-        ResourceActionsEnum.list_users,
-    },
+    # ResourceRightsEnum.own: {
+    #     ResourceActionsEnum.get_detail,
+    #     ResourceActionsEnum.patch_detail,
+    #     ResourceActionsEnum.unregister,
+    #     ResourceActionsEnum.list_users,
+    # },
     ResourceRightsEnum.admin: {
         ResourceActionsEnum.get_detail,
         # admin cannot change people's password or name..

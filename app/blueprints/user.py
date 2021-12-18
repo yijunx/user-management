@@ -2,8 +2,10 @@
 from flask import Blueprint, request
 from flask_pydantic import validate
 from app.casbin.role_definition import ResourceActionsEnum
+from app.exceptions.rbac import NotAuthorized
 from app.schemas.pagination import QueryPagination
 from app.schemas.user import (
+    UserInDecodedToken,
     UserInResponse,
     UserInResponseWithAdminInfo,
     UserPatch,
@@ -64,16 +66,18 @@ def list_users(query: QueryPagination):
 
 
 @bp.route("/<user_id>", methods=["GET"])
-@authorize_user_domain(action=ResourceActionsEnum.get_detail)
+@authorize_user_domain(require_casbin=False)
 @validate()
 def get_user(user_id: str):
+    """doc string here"""
+    actor: User = request.environ["actor"]
     try:
-        user = userService.get_user_in_response(item_id=user_id)
-        admin_info = rbacService.admin_check(user_id=user.id)
+        user = userService.get_user_in_response(item_id=user_id, actor=actor)
+        admin_info = rbacService.admin_check(user_id=actor.id)
         user_in_reponse_with_admin_info = UserInResponseWithAdminInfo(
             **user.dict(), admin_info=admin_info
         )
-    except UserDoesNotExist as e:
+    except (UserDoesNotExist, NotAuthorized) as e:
         return create_response(
             success=False, message=e.message, status_code=e.status_code
         )
@@ -88,13 +92,16 @@ def get_user(user_id: str):
 
 
 @bp.route("/<user_id>", methods=["PATCH"])
-@authorize_user_domain(action=ResourceActionsEnum.patch_detail)
+@authorize_user_domain(require_casbin=False)
 @validate()
 def patch_user(user_id: str, body: UserPatch):
+    actor: User = request.environ["actor"]
     try:
-        user = userService.update_user_detail(item_id=user_id, user_patch=body)
-        
-    except UserDoesNotExist as e:
+        user = userService.update_user_detail(
+            item_id=user_id, user_patch=body, actor=actor
+        )
+
+    except (UserDoesNotExist, NotAuthorized) as e:
         return create_response(
             success=False, message=e.message, status_code=e.status_code
         )
@@ -112,6 +119,7 @@ def patch_user(user_id: str, body: UserPatch):
 @authorize_user_domain(action=ResourceActionsEnum.delete_user)
 @validate()
 def delete_user(user_id: str):
+    """this is admin action desu"""
     try:
         userService.delete_user(item_id=user_id)
     except UserDoesNotExist as e:

@@ -35,10 +35,10 @@ def create_casbin_enforcer():
         admin users will have * in obj in the admin role policy, so admin user can
         do things on any resource
         """
-        if object_from_request.startswith(object_from_policy):
-            return True
-        else:
-            return object_from_request == object_from_policy
+        # if object_from_request.startswith(object_from_policy):
+        #     return True
+        # else:
+        return object_from_request == object_from_policy
 
     casbin_enforcer.add_function("actions_mapping", actions_mapping)
     casbin_enforcer.add_function("objects_mapping", objects_mapping)
