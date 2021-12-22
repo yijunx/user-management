@@ -34,6 +34,7 @@ from app.exceptions.user import (
 )
 from flask_wtf import csrf
 from app.util.password import verify_password
+from datetime import timezone
 
 
 bp = Blueprint("core", __name__, url_prefix="/api")
@@ -255,11 +256,11 @@ def send_verify_email():
     try:
         userService.send_email_verification(user_in_token=user_in_token)
     except (UserDoesNotExist, UserEmailAlreadyVerified) as e:
-        return create_response(success=False, message=e.message, status=403)
+        return create_response(success=False, message=e.message, status_code=403)
     except Exception as e:
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
-    return create_response(status=200, message="verification email sent!!!")
+    return create_response(message="verification email sent!!!")
 
 
 @bp.route("/reset_password_after_login", methods=["POST"])
@@ -289,26 +290,31 @@ def authenticate():
     """this is for all other microservices, must go through here to validate token
     with the public key
     """
-    print(request.headers)
+    logger.info("authen!!!!!!!")
     user_in_token = get_user_info_from_request(request=request)
     try:
         user = userService.get_user(item_id=user_in_token.id)
-
+        logger.info(user.name)
         # check if the user's email is verified
         if user.login_method == LoginMethodEnum.password:
             if not user.email_verified:
                 return create_response(
-                    status=400,
+                    status_code=400,
                     message="you must verify your email before doing any contribution",
                 )
-        if user.last_logout is None or user_in_token.iat > user.last_logout:
-            return create_response(status=200, message="welcome")
+        if user.last_logout is None:
+            return create_response(status_code=200, message="welcome")
         else:
-            return create_response(
-                status=403, message="You have been logged out, pls login again"
-            )
+            if user_in_token.iat.replace(
+                tzinfo=timezone.utc
+            ) > user.last_logout.replace(tzinfo=timezone.utc):
+                return create_response(status_code=200, message="welcome")
+            else:
+                return create_response(
+                    status_code=403, message="You have been logged out, pls login again"
+                )
     except UserDoesNotExist as e:
-        return create_response(success=False, message=e.message, status=403)
+        return create_response(success=False, message=e.message, status_code=403)
     except Exception as e:
         logger.debug(e, exc_info=True)
         return create_response(success=False, message=str(e), status_code=500)
